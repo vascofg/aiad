@@ -6,15 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import elements.Container;
+import elements.Element;
+import elements.GarbageContainer;
+import elements.GlassContainer;
+import elements.Grass;
+import elements.PaperContainer;
+import elements.PlasticContainer;
+import elements.Road;
 import main.GarbageCollector;
-import objects.Container;
-import objects.Element;
-import objects.GarbageContainer;
-import objects.GlassContainer;
-import objects.PaperContainer;
-import objects.PlasticContainer;
-import objects.Road;
-import objects.Grass;
 
 public class FileParser {
 	public static void parseFile(String name) {

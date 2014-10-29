@@ -7,8 +7,8 @@ import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
+import elements.Element;
 import main.GarbageCollector;
-import objects.Element;
 
 public class MapJComponent extends JComponent {
 

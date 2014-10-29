@@ -1,5 +1,6 @@
 package main;
 
+import elements.Element;
 import files.FileParser;
 import gui.MapJComponent;
 
@@ -10,8 +11,6 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-
-import objects.Element;
 
 public class GarbageCollector {
 
@@ -35,6 +34,10 @@ public class GarbageCollector {
 		try {
 			Element.grass = ImageIO.read(new File("img/grass.png"));
 			Element.asphalt = ImageIO.read(new File("img/asphalt.png"));
+			Element.glassContainer = ImageIO.read(new File("img/glasscontainer.png"));
+			Element.paperContainer = ImageIO.read(new File("img/papercontainer.png"));
+			Element.plasticContainer = ImageIO.read(new File("img/plasticcontainer.png"));
+			Element.garbageContainer = ImageIO.read(new File("img/garbagecontainer.png"));
 			Element.imgDim = new Dimension(Element.grass.getWidth(),
 					Element.grass.getHeight());
 		} catch (IOException e) {
