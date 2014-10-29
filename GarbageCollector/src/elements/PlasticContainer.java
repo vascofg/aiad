@@ -10,6 +10,9 @@ public class PlasticContainer extends Container {
 	
 	@Override
 	public BufferedImage getImg() {
-		return Element.plasticContainer;
+		if(this.isEmpty())
+			return Element.plasticContainer;
+		else
+			return Element.plasticContainerFull;
 	}
 }

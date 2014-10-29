@@ -10,6 +10,9 @@ public class PaperContainer extends Container  {
 	
 	@Override
 	public BufferedImage getImg() {
-		return Element.paperContainer;
+		if(this.isEmpty())
+			return Element.paperContainer;
+		else
+			return Element.paperContainerFull;
 	}
 }

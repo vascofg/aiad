@@ -10,6 +10,9 @@ public class GlassContainer extends Container  {
 	
 	@Override
 	public BufferedImage getImg() {
-		return Element.glassContainer;
+		if(this.isEmpty())
+			return Element.glassContainer;
+		else
+			return Element.glassContainerFull;
 	}
 }

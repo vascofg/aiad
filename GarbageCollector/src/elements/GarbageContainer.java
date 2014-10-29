@@ -10,6 +10,9 @@ public class GarbageContainer extends Container  {
 	
 	@Override
 	public BufferedImage getImg() {
-		return Element.garbageContainer;
+		if(this.isEmpty())
+			return Element.garbageContainer;
+		else
+			return Element.garbageContainerFull;
 	}
 }
