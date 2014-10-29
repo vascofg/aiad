@@ -1,0 +1,17 @@
+#R-estrada dois sentidos
+#r-estrada um sentido
+#--muro
+#P-papel
+#E-embalagens
+#V-vidro
+#I-indiferenciado
+
+-R-
+-R-
+-R-
+-R-
+-R-
+-RV
+PR-
+ER-
+-RI
