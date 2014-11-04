@@ -2,7 +2,9 @@ package elements;
 
 import java.awt.image.BufferedImage;
 
-public class PlasticContainer extends Container {
+import assets.Assets;
+
+public class PlasticContainer extends Container implements DrawableElement {
 
 	public PlasticContainer(int capacity) {
 		super(capacity);
@@ -11,8 +13,13 @@ public class PlasticContainer extends Container {
 	@Override
 	public BufferedImage getImg() {
 		if(this.isEmpty())
-			return Element.plasticContainer;
+			return Assets.plasticContainer;
 		else
-			return Element.plasticContainerFull;
+			return Assets.plasticContainerFull;
+	}
+
+	@Override
+	public boolean truckCompatible(Truck truck) {
+		return truck instanceof PlasticTruck;
 	}
 }

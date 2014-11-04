@@ -7,8 +7,9 @@ import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
-import elements.Element;
 import main.GarbageCollector;
+import assets.Assets;
+import elements.MapElement;
 
 public class MapJComponent extends JComponent {
 
@@ -20,21 +21,21 @@ public class MapJComponent extends JComponent {
 	private static Dimension mapDim;
 
 	public MapJComponent() {
-		mapDim = new Dimension(Element.imgDim.width
+		mapDim = new Dimension(Assets.imgDim.width
 				* GarbageCollector.mapMatrix.get(0).size(),
-				Element.imgDim.height * GarbageCollector.mapMatrix.size());
+				Assets.imgDim.height * GarbageCollector.mapMatrix.size());
 		this.setPreferredSize(mapDim);
 	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		int x = 0, y = 0;
-		for (ArrayList<Element> line : GarbageCollector.mapMatrix) {
-			for (Element element : line) {
+		for (ArrayList<MapElement> line : GarbageCollector.mapMatrix) {
+			for (MapElement element : line) {
 				BufferedImage img = element.getImg();
 				if (img != null)
-					g.drawImage(element.getImg(), x * Element.imgDim.width, y
-							* Element.imgDim.height, null);
+					g.drawImage(element.getImg(), x * Assets.imgDim.width, y
+							* Assets.imgDim.height, null);
 				x++;
 			}
 			x = 0;

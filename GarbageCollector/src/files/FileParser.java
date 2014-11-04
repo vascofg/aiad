@@ -6,15 +6,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import main.GarbageCollector;
 import elements.Container;
-import elements.Element;
+import elements.Deposit;
 import elements.GarbageContainer;
 import elements.GlassContainer;
 import elements.Grass;
+import elements.MapElement;
 import elements.PaperContainer;
 import elements.PlasticContainer;
 import elements.Road;
-import main.GarbageCollector;
 
 public class FileParser {
 	public static void parseFile(String name) {
@@ -25,7 +26,7 @@ public class FileParser {
 			while ((line = in.readLine()) != null) {
 				if (line.isEmpty() || line.charAt(0) == '#')
 					continue;
-				ArrayList<Element> lineList = new ArrayList<Element>();
+				ArrayList<MapElement> lineList = new ArrayList<MapElement>();
 				for (char c : line.toCharArray()) {
 					switch (c) {
 					case '-': // wall
@@ -52,6 +53,9 @@ public class FileParser {
 					case 'I': // garbage container
 						lineList.add(new GarbageContainer(
 								Container.defaultCapacity));
+						break;
+					case 'D': // deposit
+						lineList.add(new Deposit());
 						break;
 					default:
 						System.out.println("Character>" + c);

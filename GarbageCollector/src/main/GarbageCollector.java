@@ -1,22 +1,19 @@
 package main;
 
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+
+import assets.Assets;
 import elements.Container;
-import elements.Element;
+import elements.MapElement;
 import exceptions.ContainerFullException;
 import files.FileParser;
 import gui.MapJComponent;
 
-import java.awt.Dimension;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
-import javax.swing.JFrame;
-
 public class GarbageCollector {
 
-	public static ArrayList<ArrayList<Element>> mapMatrix = new ArrayList<ArrayList<Element>>();
+	public static ArrayList<ArrayList<MapElement>> mapMatrix = new ArrayList<ArrayList<MapElement>>();
 	private static JFrame frame;
 	private static MapJComponent mapComponent;
 	
@@ -34,27 +31,8 @@ public class GarbageCollector {
 		frame.setVisible(true);
 	}
 	
-	private static void loadAssets() {
-		try {
-			Element.grass = ImageIO.read(new File("img/grass.png"));
-			Element.asphalt = ImageIO.read(new File("img/asphalt.png"));
-			Element.glassContainer = ImageIO.read(new File("img/glasscontainer.png"));
-			Element.paperContainer = ImageIO.read(new File("img/papercontainer.png"));
-			Element.plasticContainer = ImageIO.read(new File("img/plasticcontainer.png"));
-			Element.garbageContainer = ImageIO.read(new File("img/garbagecontainer.png"));
-			Element.glassContainerFull = ImageIO.read(new File("img/glasscontainerfull.png"));
-			Element.paperContainerFull = ImageIO.read(new File("img/papercontainerfull.png"));
-			Element.plasticContainerFull = ImageIO.read(new File("img/plasticcontainerfull.png"));
-			Element.garbageContainerFull = ImageIO.read(new File("img/garbagecontainerfull.png"));
-			Element.imgDim = new Dimension(Element.grass.getWidth(),
-					Element.grass.getHeight());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	public static void main(String[] args) {
-		loadAssets();
+		Assets.loadAssets();
 		FileParser.parseFile("maps/simple.txt");
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.

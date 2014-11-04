@@ -2,7 +2,9 @@ package elements;
 
 import java.awt.image.BufferedImage;
 
-public class Road extends Element {
+import assets.Assets;
+
+public class Road extends MapElement implements DrawableElement {
 	boolean twoWay;
 
 	public Road(boolean twoWay) {
@@ -11,6 +13,6 @@ public class Road extends Element {
 
 	@Override
 	public BufferedImage getImg() {
-		return Element.asphalt;
+		return Assets.asphalt;
 	}
 }

@@ -4,10 +4,11 @@ import java.awt.image.BufferedImage;
 
 import assets.Assets;
 
-public class Grass extends MapElement implements DrawableElement {
-	
+public class PlasticTruck extends Truck implements DrawableElement {
+
 	@Override
 	public BufferedImage getImg() {
-		return Assets.grass;
+		return Assets.plasticTruck;
 	}
+
 }

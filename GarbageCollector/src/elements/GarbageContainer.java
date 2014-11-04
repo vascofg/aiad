@@ -2,7 +2,9 @@ package elements;
 
 import java.awt.image.BufferedImage;
 
-public class GarbageContainer extends Container  {
+import assets.Assets;
+
+public class GarbageContainer extends Container implements DrawableElement {
 
 	public GarbageContainer(int capacity) {
 		super(capacity);
@@ -11,8 +13,13 @@ public class GarbageContainer extends Container  {
 	@Override
 	public BufferedImage getImg() {
 		if(this.isEmpty())
-			return Element.garbageContainer;
+			return Assets.garbageContainer;
 		else
-			return Element.garbageContainerFull;
+			return Assets.garbageContainerFull;
+	}
+
+	@Override
+	public boolean truckCompatible(Truck truck) {
+		return truck instanceof GarbageTruck;
 	}
 }

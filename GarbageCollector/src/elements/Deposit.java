@@ -4,10 +4,9 @@ import java.awt.image.BufferedImage;
 
 import assets.Assets;
 
-public class Grass extends MapElement implements DrawableElement {
-	
+public class Deposit extends MapElement implements DrawableElement {
 	@Override
 	public BufferedImage getImg() {
-		return Assets.grass;
+		return Assets.deposit;
 	}
 }

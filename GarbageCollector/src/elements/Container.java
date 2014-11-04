@@ -2,7 +2,7 @@ package elements;
 
 import exceptions.ContainerFullException;
 
-public abstract class Container extends Element {
+public abstract class Container extends MapElement {
 	
 	public static int defaultCapacity = 20;
 
@@ -35,4 +35,6 @@ public abstract class Container extends Element {
 	public boolean isEmpty() {
 		return usedCapacity == 0;
 	}
+	
+	public abstract boolean truckCompatible(Truck truck);
 }
