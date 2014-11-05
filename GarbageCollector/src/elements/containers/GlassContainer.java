@@ -1,13 +1,16 @@
-package elements;
+package elements.containers;
 
 import java.awt.image.BufferedImage;
 
 import assets.Assets;
+import elements.DrawableElement;
+import elements.trucks.GlassTruck;
+import elements.trucks.Truck;
 
 public class GlassContainer extends Container implements DrawableElement {
 
-	public GlassContainer(int capacity) {
-		super(capacity);
+	public GlassContainer(int x, int y, int capacity) {
+		super(x, y, capacity);
 	}
 	
 	@Override

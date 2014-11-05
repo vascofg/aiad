@@ -1,5 +1,7 @@
-package elements;
+package elements.containers;
 
+import elements.MapElement;
+import elements.trucks.Truck;
 import exceptions.ContainerFullException;
 
 public abstract class Container extends MapElement {
@@ -8,7 +10,8 @@ public abstract class Container extends MapElement {
 
 	int capacity, usedCapacity;
 	
-	public Container(int capacity) {
+	public Container(int x, int y, int capacity) {
+		super(x,y);
 		this.capacity = capacity;
 		this.usedCapacity = 0;
 	}

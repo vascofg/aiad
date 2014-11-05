@@ -1,13 +1,16 @@
-package elements;
+package elements.containers;
 
 import java.awt.image.BufferedImage;
 
 import assets.Assets;
+import elements.DrawableElement;
+import elements.trucks.PaperTruck;
+import elements.trucks.Truck;
 
 public class PaperContainer extends Container implements DrawableElement  {
 
-	public PaperContainer(int capacity) {
-		super(capacity);
+	public PaperContainer(int x, int y, int capacity) {
+		super(x, y, capacity);
 	}
 	
 	@Override

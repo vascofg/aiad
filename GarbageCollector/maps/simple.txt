@@ -6,12 +6,15 @@
 #V-vidro
 #I-indiferenciado
 
--D-
--R-
--R-
--R-
--R-
--RV
-PR-
-ER-
--RI
+------------------
+DRRRRRRRRRRRRRRRR-
+-R--------------R-
+-RRRRRR--------VR-
+-R----R---------R-
+-R----R-I-------R-
+-R----RRRRR-----R-
+PR--------R----PR-
+ER--------R-----R-
+-R--------R--E--R-
+-RRRRRRRRRRRRRRRR-
+------------------

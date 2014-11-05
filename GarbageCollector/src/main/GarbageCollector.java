@@ -1,55 +1,32 @@
 package main;
 
-import java.util.ArrayList;
-
-import javax.swing.JFrame;
-
-import assets.Assets;
-import elements.Container;
-import elements.MapElement;
-import exceptions.ContainerFullException;
 import files.FileParser;
-import gui.MapJComponent;
+import gui.MapJFrame;
+import map.Map;
+import assets.Assets;
 
 public class GarbageCollector {
 
-	public static ArrayList<ArrayList<MapElement>> mapMatrix = new ArrayList<ArrayList<MapElement>>();
-	private static JFrame frame;
-	private static MapJComponent mapComponent;
-	
-	private static void createAndShowGUI() {
-		// Create and set up the window.
-		frame = new JFrame("GarbageCollector");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public static Map map;
+	public static MapJFrame frame;
+	private static TruckThread truckThread;
 
-		mapComponent = new MapJComponent();
-		frame.getContentPane().add(mapComponent);
-
-		frame.setResizable(false);
-		// Display the window.
-		frame.pack();
-		frame.setVisible(true);
-	}
-	
 	public static void main(String[] args) {
+		map = new Map();
 		Assets.loadAssets();
 		FileParser.parseFile("maps/simple.txt");
+		map.initTrucks();
+
+		truckThread = new TruckThread();
+		
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				createAndShowGUI();
+				frame = new MapJFrame("Garbage Collector");
+				truckThread.start();
 			}
 		});
-		try {
-			Thread.sleep(2000);
-			((Container) mapMatrix.get(6).get(0)).addToContainer(20);
-			mapComponent.repaint();
-		} catch (InterruptedException | ContainerFullException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 
 }

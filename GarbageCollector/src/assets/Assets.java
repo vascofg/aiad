@@ -15,6 +15,9 @@ public abstract class Assets {
 	plasticTruck, garbageTruck;
 	
 	public static Dimension imgDim;
+	
+	//directions for truck movement
+	public static final int TOP = 0, BOTTOM = 1, LEFT = 2, RIGHT = 3;
 
 	public static void loadAssets() {
 		try {

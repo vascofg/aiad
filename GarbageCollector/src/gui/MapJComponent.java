@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -18,28 +17,15 @@ public class MapJComponent extends JComponent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static Dimension mapDim;
-
-	public MapJComponent() {
-		mapDim = new Dimension(Assets.imgDim.width
-				* GarbageCollector.mapMatrix.get(0).size(),
-				Assets.imgDim.height * GarbageCollector.mapMatrix.size());
-		this.setPreferredSize(mapDim);
-	}
-
 	@Override
 	protected void paintComponent(Graphics g) {
-		int x = 0, y = 0;
-		for (ArrayList<MapElement> line : GarbageCollector.mapMatrix) {
+		for (ArrayList<MapElement> line : GarbageCollector.map.mapMatrix) {
 			for (MapElement element : line) {
 				BufferedImage img = element.getImg();
 				if (img != null)
-					g.drawImage(element.getImg(), x * Assets.imgDim.width, y
-							* Assets.imgDim.height, null);
-				x++;
+					g.drawImage(img, element.getX() * Assets.imgDim.width,
+							element.getY() * Assets.imgDim.height, null);
 			}
-			x = 0;
-			y++;
 		}
 		super.paintComponent(g);
 	}

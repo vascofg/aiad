@@ -6,6 +6,10 @@ import assets.Assets;
 
 public class Grass extends MapElement implements DrawableElement {
 	
+	public Grass(int x, int y) {
+		super(x, y);
+	}
+
 	@Override
 	public BufferedImage getImg() {
 		return Assets.grass;
