@@ -13,8 +13,8 @@ public class PaperTruck extends Truck implements DrawableElement {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public PaperTruck(Road initialLocation) {
-		super(initialLocation);
+	public PaperTruck(Road initialLocation, int capacity) {
+		super(initialLocation, capacity);
 		// TODO Auto-generated constructor stub
 	}
 

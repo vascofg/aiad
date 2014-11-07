@@ -39,5 +39,9 @@ public abstract class Container extends MapElement {
 		return usedCapacity == 0;
 	}
 	
+	public int getUsedCapacity() {
+		return usedCapacity;
+	}
+	
 	public abstract boolean truckCompatible(Truck truck);
 }

@@ -13,8 +13,8 @@ public class GlassTruck extends Truck implements DrawableElement {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public GlassTruck(Road initialLocation) {
-		super(initialLocation);
+	public GlassTruck(Road initialLocation, int capacity) {
+		super(initialLocation, capacity);
 		// TODO Auto-generated constructor stub
 	}
 

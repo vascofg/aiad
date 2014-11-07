@@ -13,8 +13,8 @@ public class GarbageTruck extends Truck implements DrawableElement {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public GarbageTruck(Road initialLocation) {
-		super(initialLocation);
+	public GarbageTruck(Road initialLocation, int capacity) {
+		super(initialLocation, capacity);
 		// TODO Auto-generated constructor stub
 	}
 

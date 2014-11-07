@@ -10,6 +10,7 @@ public class GarbageCollector {
 	public static Map map;
 	public static MapJFrame frame;
 	private static TruckThread truckThread;
+	private static ContainerThread containerThread;
 
 	public static void main(String[] args) {
 		map = new Map();
@@ -18,6 +19,7 @@ public class GarbageCollector {
 		map.initTrucks();
 
 		truckThread = new TruckThread();
+		containerThread = new ContainerThread();
 		
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
@@ -25,6 +27,7 @@ public class GarbageCollector {
 			public void run() {
 				frame = new MapJFrame("Garbage Collector");
 				truckThread.start();
+				containerThread.start();
 			}
 		});
 	}

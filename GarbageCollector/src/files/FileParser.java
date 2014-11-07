@@ -23,7 +23,8 @@ public class FileParser {
 		try {
 			in = new BufferedReader(new FileReader(name));
 			String line;
-			Road r;
+			Road road;
+			Container container;
 			int x = 0, y = 0;
 			while ((line = in.readLine()) != null) {
 				if (line.isEmpty() || line.charAt(0) == '#')
@@ -35,32 +36,40 @@ public class FileParser {
 						lineList.add(new Grass(x, y));
 						break;
 					case 'r': // one way road
-						r = new Road(x, y, false);
+						road = new Road(x, y, false);
 						if (GarbageCollector.map.initialRoad == null)
-							GarbageCollector.map.initialRoad = r;
-						lineList.add(r);
+							GarbageCollector.map.initialRoad = road;
+						lineList.add(road);
 						break;
 					case 'R': // two way road
-						r = new Road(x, y, true);
+						road = new Road(x, y, true);
 						if (GarbageCollector.map.initialRoad == null)
-							GarbageCollector.map.initialRoad = r;
-						lineList.add(r);
+							GarbageCollector.map.initialRoad = road;
+						lineList.add(road);
 						break;
 					case 'V': // glass container
-						lineList.add(new GlassContainer(x, y,
-								Container.defaultCapacity));
+						container = new GlassContainer(x, y,
+								Container.defaultCapacity);
+						lineList.add(container);
+						GarbageCollector.map.containers.add(container);
 						break;
 					case 'E': // plastic container
-						lineList.add(new PlasticContainer(x, y,
-								Container.defaultCapacity));
+						container = new PlasticContainer(x, y,
+								Container.defaultCapacity);
+						lineList.add(container);
+						GarbageCollector.map.containers.add(container);
 						break;
 					case 'P': // paper container
-						lineList.add(new PaperContainer(x, y,
-								Container.defaultCapacity));
+						container = new PaperContainer(x, y,
+								Container.defaultCapacity);
+						lineList.add(container);
+						GarbageCollector.map.containers.add(container);
 						break;
 					case 'I': // garbage container
-						lineList.add(new GarbageContainer(x, y,
-								Container.defaultCapacity));
+						container = new GarbageContainer(x, y,
+								Container.defaultCapacity);
+						lineList.add(container);
+						GarbageCollector.map.containers.add(container);
 						break;
 					case 'D': // deposit
 						lineList.add(new Deposit(x, y));
