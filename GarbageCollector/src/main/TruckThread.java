@@ -2,7 +2,6 @@ package main;
 
 import java.util.Random;
 
-import assets.Assets;
 import elements.trucks.Truck;
 
 public class TruckThread extends Thread {

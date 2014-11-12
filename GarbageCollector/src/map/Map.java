@@ -1,7 +1,11 @@
 package map;
 
+import jade.wrapper.StaleProxyException;
+
 import java.util.ArrayList;
 
+import main.GarbageCollector;
+import agents.TruckAgent;
 import assets.Assets;
 import elements.MapElement;
 import elements.Road;
@@ -64,9 +68,27 @@ public class Map {
 	}
 
 	public void initTrucks() {
-		trucks.add(new PlasticTruck(initialRoad, Truck.defaultCapacity));
-		trucks.add(new PaperTruck(initialRoad, Truck.defaultCapacity));
-		trucks.add(new GlassTruck(initialRoad, Truck.defaultCapacity));
-		trucks.add(new GarbageTruck(initialRoad, Truck.defaultCapacity));
+		try {
+			PlasticTruck plastic = new PlasticTruck(initialRoad, Truck.defaultCapacity);
+			plastic.agentController = GarbageCollector.containerController.createNewAgent("Plastico", TruckAgent.class.getName(), new Object[0]);
+			trucks.add(plastic);
+			plastic.agentController.start();
+			PaperTruck paper = new PaperTruck(initialRoad, Truck.defaultCapacity);
+			paper.agentController = GarbageCollector.containerController.createNewAgent("Papel", TruckAgent.class.getName(), new Object[0]);
+			trucks.add(paper);
+			paper.agentController.start();
+			GlassTruck glass = new GlassTruck(initialRoad, Truck.defaultCapacity);
+			glass.agentController = GarbageCollector.containerController.createNewAgent("Vidro", TruckAgent.class.getName(), new Object[0]);
+			trucks.add(glass);
+			glass.agentController.start();
+			GarbageTruck garbage = new GarbageTruck(initialRoad, Truck.defaultCapacity);
+			garbage.agentController = GarbageCollector.containerController.createNewAgent("Lixo", TruckAgent.class.getName(), new Object[0]);
+			trucks.add(garbage);
+			garbage.agentController.start();
+			GarbageCollector.containerController.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]).start();
+		} catch (StaleProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
