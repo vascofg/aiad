@@ -4,8 +4,6 @@ import java.awt.image.BufferedImage;
 
 import assets.Assets;
 import elements.DrawableElement;
-import elements.trucks.GarbageTruck;
-import elements.trucks.Truck;
 
 public class GarbageContainer extends Container implements DrawableElement {
 
@@ -22,7 +20,7 @@ public class GarbageContainer extends Container implements DrawableElement {
 	}
 
 	@Override
-	public boolean truckCompatible(Truck truck) {
-		return truck instanceof GarbageTruck;
+	public int getType() {
+		return Assets.GARBAGE;
 	}
 }

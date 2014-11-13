@@ -1,10 +1,9 @@
 package main;
 
-import jade.core.Profile;
-import jade.core.ProfileImpl;
-import jade.wrapper.ContainerController;
 import files.FileParser;
 import gui.MapJFrame;
+import jade.core.ProfileImpl;
+import jade.wrapper.ContainerController;
 import map.Map;
 import assets.Assets;
 

@@ -1,5 +1,8 @@
 package elements.trucks;
 
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
+
 import java.awt.image.BufferedImage;
 
 import assets.Assets;
@@ -8,19 +11,18 @@ import elements.Road;
 
 public class GarbageTruck extends Truck implements DrawableElement {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public GarbageTruck(Road initialLocation, int capacity) {
-		super(initialLocation, capacity);
-		// TODO Auto-generated constructor stub
+	public GarbageTruck(Road initialLocation, int capacity, ContainerController containerController, String agentName) throws StaleProxyException {
+		super(initialLocation, capacity, containerController, agentName, Assets.GARBAGE);
 	}
 
 	@Override
 	public BufferedImage getImg() {
 		return Assets.garbageTruck;
+	}
+	
+	@Override
+	public int getType() {
+		return Assets.GARBAGE;
 	}
 
 }

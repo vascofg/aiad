@@ -4,8 +4,6 @@ import java.awt.image.BufferedImage;
 
 import assets.Assets;
 import elements.DrawableElement;
-import elements.trucks.PlasticTruck;
-import elements.trucks.Truck;
 
 public class PlasticContainer extends Container implements DrawableElement {
 
@@ -20,9 +18,9 @@ public class PlasticContainer extends Container implements DrawableElement {
 		else
 			return Assets.plasticContainerFull;
 	}
-
+	
 	@Override
-	public boolean truckCompatible(Truck truck) {
-		return truck instanceof PlasticTruck;
+	public int getType() {
+		return Assets.PLASTIC;
 	}
 }

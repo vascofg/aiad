@@ -1,7 +1,7 @@
 package agents;
 
 import jade.core.Agent;
-import jade.core.behaviours.SimpleBehaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -13,32 +13,6 @@ public class TruckAgent extends Agent {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	class TruckBehaviour extends SimpleBehaviour {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public TruckBehaviour(Agent a) {
-			super(a);
-		}
-		
-		@Override
-		public void action() {
-			ACLMessage msg = blockingReceive();
-			if (msg.getPerformative() == ACLMessage.INFORM) {
-				System.out.println("Recebi uma mensagem do tipo INFORM");
-			}
-		}
-
-		@Override
-		public boolean done() {
-			// always running
-			return false;
-		}
-
-	}
 
 	// m√©todo setup
 	protected void setup() {
@@ -47,7 +21,10 @@ public class TruckAgent extends Agent {
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setName(getName());
-		sd.setType("a tua velha");
+		sd.setType(String.valueOf(this.getArguments()[0]));
+		setEnabledO2ACommunication(true, 0);
+		System.out.println("Created TruckAgent " + getName() + " with type: "
+				+ sd.getType());
 		dfd.addServices(sd);
 		try {
 			DFService.register(this, dfd);
@@ -55,9 +32,64 @@ public class TruckAgent extends Agent {
 			e.printStackTrace();
 		}
 
-		// cria behaviour
-		TruckBehaviour b = new TruckBehaviour(this);
-		addBehaviour(b);
+		// adiciona behaviour ciclico (ler mensagem)
+		addBehaviour(new CyclicBehaviour(this) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void action() {
+				ACLMessage msg = receive();
+				if (msg != null) {
+					if (msg.getPerformative() == ACLMessage.INFORM) {
+						System.out
+								.println(myAgent.getName() + " got INFORM from "
+										+ msg.getSender().getName()
+										+ ": "
+										+ msg.getContent());
+					}
+				}
+				else {
+					block();
+				}
+			}
+		});
+
+		// adiciona behaviour ciclico (enviar mensagem)
+		addBehaviour(new CyclicBehaviour(this) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void action() {
+				// get an object from the O2A mailbox
+				String messageContent = (String) myAgent.getO2AObject();
+
+				// if we actually got one
+				if (messageContent != null) {
+					String[] args = messageContent.split("\\s+");
+					String toSend = new String(args[1] + " " + args[2]);
+
+					// pesquisa DF por agentes "ping"
+					DFAgentDescription template = new DFAgentDescription();
+					ServiceDescription sd1 = new ServiceDescription();
+					sd1.setType(args[0]); // agentes que recebem mensagem s„o do
+											// mesmo tipo que o lixo
+					template.addServices(sd1);
+					try {
+						DFAgentDescription[] result = DFService.search(myAgent,
+								template);
+						ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+						for (int i = 0; i < result.length; ++i)
+							msg.addReceiver(result[i].getName());
+						msg.setContent(toSend);
+						send(msg);
+					} catch (FIPAException e) {
+						e.printStackTrace();
+					}
+				} else {
+					block();
+				}
+			}
+		});
 
 	}
 
@@ -66,25 +98,6 @@ public class TruckAgent extends Agent {
 		// retira registo no DF
 		try {
 			DFService.deregister(this);
-		} catch (FIPAException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void informGarbage() {
-		// pesquisa DF por agentes "ping"
-		DFAgentDescription template = new DFAgentDescription();
-		ServiceDescription sd1 = new ServiceDescription();
-		sd1.setType("a tua velha");
-		template.addServices(sd1);
-		try {
-			DFAgentDescription[] result = DFService.search(this, template);
-			// envia mensagem "pong" inicial a todos os agentes "ping"
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			for (int i = 0; i < result.length; ++i)
-				msg.addReceiver(result[i].getName());
-			msg.setContent("pong");
-			send(msg);
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}

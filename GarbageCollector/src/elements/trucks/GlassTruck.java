@@ -1,5 +1,8 @@
 package elements.trucks;
 
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
+
 import java.awt.image.BufferedImage;
 
 import assets.Assets;
@@ -8,14 +11,8 @@ import elements.Road;
 
 public class GlassTruck extends Truck implements DrawableElement {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	public GlassTruck(Road initialLocation, int capacity) {
-		super(initialLocation, capacity);
-		// TODO Auto-generated constructor stub
+	public GlassTruck(Road initialLocation, int capacity, ContainerController containerController, String agentName) throws StaleProxyException {
+		super(initialLocation, capacity, containerController, agentName, Assets.GLASS);
 	}
 
 	@Override
@@ -23,4 +20,8 @@ public class GlassTruck extends Truck implements DrawableElement {
 		return Assets.glassTruck;
 	}
 
+	@Override
+	public int getType() {
+		return Assets.GLASS;
+	}
 }

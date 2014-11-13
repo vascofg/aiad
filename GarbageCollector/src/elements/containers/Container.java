@@ -15,6 +15,8 @@ public abstract class Container extends MapElement {
 		this.capacity = capacity;
 		this.usedCapacity = 0;
 	}
+	
+	public abstract int getType();
 
 	public int getCapacity() {
 		return capacity;
@@ -43,5 +45,7 @@ public abstract class Container extends MapElement {
 		return usedCapacity;
 	}
 	
-	public abstract boolean truckCompatible(Truck truck);
+	public boolean truckCompatible(Truck truck) {
+		return truck.getType() == this.getType();
+	}
 }
