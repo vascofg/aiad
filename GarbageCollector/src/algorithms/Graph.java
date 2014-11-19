@@ -3,8 +3,7 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.List;
 
-import assets.Assets;
-import main.GarbageCollector;
+import map.Map;
 import elements.Road;
 
 public class Graph {
@@ -16,15 +15,15 @@ public class Graph {
 		this.edges = edges;
 	}
 
-	public Graph(List<Road> roads) {
+	public Graph(Map map) {
 		this.vertexes = new ArrayList<Vertex>();
 		this.edges = new ArrayList<Edge>();
-		for (Road road : roads) {
+		for (Road road : map.roads) {
 			this.vertexes.add(new Vertex(road.getID()));
 		}
-		for (Road road : roads) {
+		for (Road road : map.roads) {
 			Vertex currentVertex = getVertexByID(road.getID());
-			List<Road> adjacentRoads = GarbageCollector.map
+			List<Road> adjacentRoads = map
 					.getAllAdjacentRoads(road);
 			for (Road adjacent : adjacentRoads) {
 				Vertex adjacentVertex = getVertexByID(adjacent.getID());

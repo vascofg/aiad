@@ -9,13 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import algorithms.Edge;
-import algorithms.Vertex;
-import algorithms.Graph;
-
 public class Dijkstra {
 
-  private final List<Vertex> nodes;
   private final List<Edge> edges;
   private Set<Vertex> settledNodes;
   private Set<Vertex> unSettledNodes;
@@ -23,8 +18,6 @@ public class Dijkstra {
   private Map<Vertex, Integer> distance;
 
   public Dijkstra(Graph graph) {
-    // create a copy of the array so that we can operate on this array
-    this.nodes = new ArrayList<Vertex>(graph.getVertexes());
     this.edges = new ArrayList<Edge>(graph.getEdges());
   }
 

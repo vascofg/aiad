@@ -1,12 +1,12 @@
 package map;
 
+import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import main.GarbageCollector;
 import algorithms.Dijkstra;
 import algorithms.Graph;
 import assets.Assets;
@@ -63,24 +63,24 @@ public class Map {
 			return null;
 		}
 	}
-	
+
 	public List<Road> getAllAdjacentRoads(MapElement element) {
 		List<Road> list = new LinkedList<Road>();
 		Road topRoad = getAdjacentRoad(element, Assets.TOP);
 		Road bottomRoad = getAdjacentRoad(element, Assets.BOTTOM);
 		Road leftRoad = getAdjacentRoad(element, Assets.LEFT);
 		Road rightRoad = getAdjacentRoad(element, Assets.RIGHT);
-		if(topRoad!=null)
+		if (topRoad != null)
 			list.add(topRoad);
-		if(bottomRoad!=null)
+		if (bottomRoad != null)
 			list.add(bottomRoad);
-		if(leftRoad!=null)
+		if (leftRoad != null)
 			list.add(leftRoad);
-		if(rightRoad!=null)
+		if (rightRoad != null)
 			list.add(rightRoad);
-		return list;		
+		return list;
 	}
-	
+
 	public Container getAdjacentContainer(MapElement element, int direction) {
 		try {
 			return (Container) getAdjacentElement(element, direction);
@@ -89,21 +89,45 @@ public class Map {
 		}
 	}
 
-	public void initTrucks() {
+	public List<Container> getAllAdjacentContainers(MapElement element) {
+		List<Container> list = new LinkedList<Container>();
+		Container topContainer = getAdjacentContainer(element, Assets.TOP);
+		Container bottomContainer = getAdjacentContainer(element, Assets.BOTTOM);
+		Container leftContainer = getAdjacentContainer(element, Assets.LEFT);
+		Container rightContainer = getAdjacentContainer(element, Assets.RIGHT);
+		if (topContainer != null)
+			list.add(topContainer);
+		if (bottomContainer != null)
+			list.add(bottomContainer);
+		if (leftContainer != null)
+			list.add(leftContainer);
+		if (rightContainer != null)
+			list.add(rightContainer);
+		return list;
+	}
+
+	public void initTrucks(ContainerController containerController) {
+		System.out.println("Initializing trucks...");
 		try {
-			trucks.add(new PlasticTruck(initialRoad, Truck.defaultCapacity,GarbageCollector.containerController,"Plastico"));
-			trucks.add(new PaperTruck(initialRoad, Truck.defaultCapacity,GarbageCollector.containerController,"Papel"));
-			trucks.add(new GlassTruck(initialRoad, Truck.defaultCapacity,GarbageCollector.containerController,"Vidro"));
-			trucks.add(new GarbageTruck(initialRoad, Truck.defaultCapacity,GarbageCollector.containerController,"Lixo"));
-			GarbageCollector.containerController.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]).start();
+			trucks.add(new PlasticTruck(initialRoad, Truck.defaultCapacity,
+					containerController, "Plastico"));
+			trucks.add(new PaperTruck(initialRoad, Truck.defaultCapacity,
+					containerController, "Papel"));
+			trucks.add(new GlassTruck(initialRoad, Truck.defaultCapacity,
+					containerController, "Vidro"));
+			trucks.add(new GarbageTruck(initialRoad, Truck.defaultCapacity,
+					containerController, "Lixo"));
+			containerController.createNewAgent("rma", "jade.tools.rma.rma",
+					new Object[0]).start();
 		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void initRoads(Graph graph) {
-		for(Road road : roads) {
+		System.out.println("Initializing roads...");
+		for (Road road : roads) {
 			road.dijkstra = new Dijkstra(graph);
 			road.dijkstra.execute(graph.getVertexByID(road.getID()));
 		}

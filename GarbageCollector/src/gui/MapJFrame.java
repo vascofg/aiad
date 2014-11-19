@@ -5,7 +5,7 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 
-import main.GarbageCollector;
+import map.Map;
 import assets.Assets;
 
 public class MapJFrame extends JFrame {
@@ -18,12 +18,12 @@ public class MapJFrame extends JFrame {
 	public MapJComponent mapComponent;
 	public TrucksJComponent trucksComponent;
 	
-	public MapJFrame(String title) {
+	public MapJFrame(String title, Map map) {
 		super(title);
 		
 		mapDim = new Dimension(Assets.imgDim.width
-				* GarbageCollector.map.mapMatrix.get(0).size(),
-				Assets.imgDim.height * GarbageCollector.map.mapMatrix.size());
+				* map.mapMatrix.get(0).size(),
+				Assets.imgDim.height * map.mapMatrix.size());
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -31,11 +31,11 @@ public class MapJFrame extends JFrame {
 		layeredPane.setPreferredSize(mapDim);
 		this.add(layeredPane);
 		
-		mapComponent = new MapJComponent();
+		mapComponent = new MapJComponent(map);
 		mapComponent.setSize(mapDim);
 		layeredPane.add(mapComponent, 1, 0);
 		
-		trucksComponent = new TrucksJComponent();
+		trucksComponent = new TrucksJComponent(map);
 		trucksComponent.setSize(mapDim);
 		layeredPane.add(trucksComponent, 2, 0);
 

@@ -3,7 +3,9 @@ package elements.trucks;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
-import main.GarbageCollector;
+
+import java.util.List;
+
 import agents.TruckAgent;
 import elements.DrawableElement;
 import elements.Road;
@@ -28,7 +30,7 @@ public abstract class Truck implements DrawableElement {
 				TruckAgent.class.getName(), new Object[] { agentType });
 		this.agentController.start();
 	}
-	
+
 	public abstract int getType();
 
 	public Road getLocation() {
@@ -46,39 +48,33 @@ public abstract class Truck implements DrawableElement {
 		this.usedCapacity = 0;
 	}
 
-	public boolean moveTruck(int direction) {
-		Road destination = GarbageCollector.map.getAdjacentRoad(
-				this.currentLocation, direction);
-		if (destination != null) {
+	public boolean moveTruck(Road destination) {
+		if (true) { // TODO: verificar se há algum truck no caminho
 			this.currentLocation = destination;
 			return true;
 		}
 		return false;
 	}
 
-	public boolean emptyAdjacentContainers() {
+	public boolean emptyAdjacentContainers(List<Container> adjacentContainers) {
 		boolean emptiedAny = false;
-		for (int i = 1; i <= 4; i++) {
-			Container c = GarbageCollector.map.getAdjacentContainer(
-					this.currentLocation, i);
-			if (c != null) {
-				if (c.truckCompatible(this)) {
-					try {
-						this.addToTruck(c.getUsedCapacity());
-						c.emptyContainer();
-						emptiedAny = true;
-					} catch (TruckFullException e) { //TODO: inform trucks of same type
-						return false;
-					}
+		for (Container c : adjacentContainers) {
+			if (c.truckCompatible(this)) {
+				try {
+					this.addToTruck(c.getUsedCapacity());
+					c.emptyContainer();
+					emptiedAny = true;
+				} catch (TruckFullException e) { // TODO: inform trucks of same
+													// type
+					return false;
 				}
-				else if(c.getUsedCapacity()>0) { // inform other trucks
-					//TODO: Send used capacity?
-					try {
-						informGarbage(c.getType(), c.getX(), c.getY());
-					} catch (StaleProxyException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+			} else if (c.getUsedCapacity() > 0) { // inform other trucks
+				// TODO: Send used capacity?
+				try {
+					informGarbage(c.getType(), c.getX(), c.getY());
+				} catch (StaleProxyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}

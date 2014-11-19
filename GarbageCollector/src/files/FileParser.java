@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import main.GarbageCollector;
+import map.Map;
 import elements.Deposit;
 import elements.Grass;
 import elements.MapElement;
@@ -18,7 +18,8 @@ import elements.containers.PaperContainer;
 import elements.containers.PlasticContainer;
 
 public class FileParser {
-	public static void parseFile(String name) {
+	public static Map parseFile(String name) {
+		Map map = new Map();
 		BufferedReader in;
 		try {
 			in = new BufferedReader(new FileReader(name));
@@ -37,41 +38,41 @@ public class FileParser {
 						break;
 					case 'r': // one way road
 						road = new Road(x, y, false);
-						if (GarbageCollector.map.initialRoad == null)
-							GarbageCollector.map.initialRoad = road;
+						if (map.initialRoad == null)
+							map.initialRoad = road;
 						lineList.add(road);
-						GarbageCollector.map.roads.add(road);
+						map.roads.add(road);
 						break;
 					case 'R': // two way road
 						road = new Road(x, y, true);
-						if (GarbageCollector.map.initialRoad == null)
-							GarbageCollector.map.initialRoad = road;
+						if (map.initialRoad == null)
+							map.initialRoad = road;
 						lineList.add(road);
-						GarbageCollector.map.roads.add(road);
+						map.roads.add(road);
 						break;
 					case 'V': // glass container
 						container = new GlassContainer(x, y,
 								Container.defaultCapacity);
 						lineList.add(container);
-						GarbageCollector.map.containers.add(container);
+						map.containers.add(container);
 						break;
 					case 'E': // plastic container
 						container = new PlasticContainer(x, y,
 								Container.defaultCapacity);
 						lineList.add(container);
-						GarbageCollector.map.containers.add(container);
+						map.containers.add(container);
 						break;
 					case 'P': // paper container
 						container = new PaperContainer(x, y,
 								Container.defaultCapacity);
 						lineList.add(container);
-						GarbageCollector.map.containers.add(container);
+						map.containers.add(container);
 						break;
 					case 'I': // garbage container
 						container = new GarbageContainer(x, y,
 								Container.defaultCapacity);
 						lineList.add(container);
-						GarbageCollector.map.containers.add(container);
+						map.containers.add(container);
 						break;
 					case 'D': // deposit
 						lineList.add(new Deposit(x, y));
@@ -82,9 +83,9 @@ public class FileParser {
 					}
 					x++;
 				}
-				x=0;
+				x = 0;
 				y++;
-				GarbageCollector.map.mapMatrix.add(lineList);
+				map.mapMatrix.add(lineList);
 			}
 			in.close();
 		} catch (FileNotFoundException e) {
@@ -93,5 +94,6 @@ public class FileParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return map;
 	}
 }
