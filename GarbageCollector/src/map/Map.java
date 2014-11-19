@@ -3,8 +3,12 @@ package map;
 import jade.wrapper.StaleProxyException;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import main.GarbageCollector;
+import algorithms.Dijkstra;
+import algorithms.Graph;
 import assets.Assets;
 import elements.MapElement;
 import elements.Road;
@@ -19,12 +23,14 @@ public class Map {
 	public ArrayList<ArrayList<MapElement>> mapMatrix;
 	public ArrayList<Truck> trucks;
 	public ArrayList<Container> containers;
+	public ArrayList<Road> roads;
 	public Road initialRoad;
 
 	public Map() {
 		this.mapMatrix = new ArrayList<ArrayList<MapElement>>();
 		this.trucks = new ArrayList<Truck>();
 		this.containers = new ArrayList<Container>();
+		this.roads = new ArrayList<Road>();
 	}
 
 	public MapElement getElement(int x, int y) throws IndexOutOfBoundsException {
@@ -58,6 +64,23 @@ public class Map {
 		}
 	}
 	
+	public List<Road> getAllAdjacentRoads(MapElement element) {
+		List<Road> list = new LinkedList<Road>();
+		Road topRoad = getAdjacentRoad(element, Assets.TOP);
+		Road bottomRoad = getAdjacentRoad(element, Assets.BOTTOM);
+		Road leftRoad = getAdjacentRoad(element, Assets.LEFT);
+		Road rightRoad = getAdjacentRoad(element, Assets.RIGHT);
+		if(topRoad!=null)
+			list.add(topRoad);
+		if(bottomRoad!=null)
+			list.add(bottomRoad);
+		if(leftRoad!=null)
+			list.add(leftRoad);
+		if(rightRoad!=null)
+			list.add(rightRoad);
+		return list;		
+	}
+	
 	public Container getAdjacentContainer(MapElement element, int direction) {
 		try {
 			return (Container) getAdjacentElement(element, direction);
@@ -76,6 +99,13 @@ public class Map {
 		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public void initRoads(Graph graph) {
+		for(Road road : roads) {
+			road.dijkstra = new Dijkstra(graph);
+			road.dijkstra.execute(graph.getVertexByID(road.getID()));
 		}
 	}
 }

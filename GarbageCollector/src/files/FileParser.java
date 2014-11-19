@@ -40,12 +40,14 @@ public class FileParser {
 						if (GarbageCollector.map.initialRoad == null)
 							GarbageCollector.map.initialRoad = road;
 						lineList.add(road);
+						GarbageCollector.map.roads.add(road);
 						break;
 					case 'R': // two way road
 						road = new Road(x, y, true);
 						if (GarbageCollector.map.initialRoad == null)
 							GarbageCollector.map.initialRoad = road;
 						lineList.add(road);
+						GarbageCollector.map.roads.add(road);
 						break;
 					case 'V': // glass container
 						container = new GlassContainer(x, y,

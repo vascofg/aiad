@@ -5,6 +5,8 @@ import gui.MapJFrame;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
 import map.Map;
+import algorithms.Dijkstra;
+import algorithms.Graph;
 import assets.Assets;
 
 public class GarbageCollector {
@@ -21,6 +23,8 @@ public class GarbageCollector {
 		map = new Map();
 		Assets.loadAssets();
 		FileParser.parseFile("maps/simple.txt");
+		Graph graph = new Graph(map.roads);
+		map.initRoads(graph);
 		map.initTrucks();
 
 		truckThread = new TruckThread();
