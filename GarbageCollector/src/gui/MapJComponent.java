@@ -21,7 +21,7 @@ public class MapJComponent extends JComponent {
 	public MapJComponent(Map map) {
 		this.map = map;
 	}
-	
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		for (ArrayList<MapElement> line : map.mapMatrix) {

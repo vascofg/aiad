@@ -11,6 +11,10 @@ public class GarbageContainer extends Container implements DrawableElement {
 		super(x, y, capacity);
 	}
 
+	public GarbageContainer(GarbageContainer other) {
+		super(other.x, other.y, null);
+	}
+
 	@Override
 	public BufferedImage getImg() {
 		if (this.isEmpty())
@@ -22,5 +26,10 @@ public class GarbageContainer extends Container implements DrawableElement {
 	@Override
 	public int getType() {
 		return Assets.GARBAGE;
+	}
+
+	@Override
+	public GarbageContainer copy() {
+		return new GarbageContainer(this);
 	}
 }

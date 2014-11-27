@@ -5,17 +5,18 @@ import elements.trucks.Truck;
 import exceptions.ContainerFullException;
 
 public abstract class Container extends MapElement {
-	
+
 	public static int defaultCapacity = 20;
 
-	int capacity, usedCapacity;
-	
-	public Container(int x, int y, int capacity) {
-		super(x,y);
+	Integer capacity, usedCapacity;
+
+	public Container(int x, int y, Integer capacity) {
+		super(x, y);
 		this.capacity = capacity;
-		this.usedCapacity = 0;
+		if (this.capacity != null)
+			this.usedCapacity = 0;
 	}
-	
+
 	public abstract int getType();
 
 	public int getCapacity() {
@@ -40,11 +41,11 @@ public abstract class Container extends MapElement {
 	public boolean isEmpty() {
 		return usedCapacity == 0;
 	}
-	
+
 	public int getUsedCapacity() {
 		return usedCapacity;
 	}
-	
+
 	public boolean truckCompatible(Truck truck) {
 		return truck.getType() == this.getType();
 	}

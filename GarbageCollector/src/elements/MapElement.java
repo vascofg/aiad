@@ -2,12 +2,20 @@ package elements;
 
 //generic map element class
 public abstract class MapElement implements DrawableElement {
-	private int x,y;
-	
+	protected int x;
+	protected int y;
+
 	public MapElement(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
+
+	public MapElement(MapElement other) {
+		this.x = other.x;
+		this.y = other.y;
+	}
+
+	public abstract MapElement copy();
 
 	public int getX() {
 		return x;

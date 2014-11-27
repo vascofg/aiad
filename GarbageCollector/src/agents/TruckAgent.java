@@ -41,14 +41,12 @@ public class TruckAgent extends Agent {
 				ACLMessage msg = receive();
 				if (msg != null) {
 					if (msg.getPerformative() == ACLMessage.INFORM) {
-						System.out
-								.println(myAgent.getName() + " got INFORM from "
-										+ msg.getSender().getName()
-										+ ": "
-										+ msg.getContent());
+						System.out.println(myAgent.getName()
+								+ " got INFORM from "
+								+ msg.getSender().getName() + ": "
+								+ msg.getContent());
 					}
-				}
-				else {
+				} else {
 					block();
 				}
 			}
@@ -71,7 +69,7 @@ public class TruckAgent extends Agent {
 					// pesquisa DF por agentes "ping"
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd1 = new ServiceDescription();
-					sd1.setType(args[0]); // agentes que recebem mensagem são do
+					sd1.setType(args[0]); // agentes que recebem mensagem sï¿½o do
 											// mesmo tipo que o lixo
 					template.addServices(sd1);
 					try {

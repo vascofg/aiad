@@ -1,30 +1,29 @@
 package main;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JComponent;
 
-import map.Map;
 import elements.containers.Container;
 import exceptions.ContainerFullException;
 
 public class ContainerThread extends Thread {
 	private boolean go = true;
 	private static final int tickTime = 10000; // in ms
-	private static Random randGenerator = new Random();
-	private Map map;
+	private ArrayList<Container> containers;
 	private JComponent component;
 
-	public ContainerThread(Map map, JComponent component) {
-		this.map = map;
+	public ContainerThread(ArrayList<Container> containers, JComponent component) {
+		this.containers = containers;
 		this.component = component;
 	}
-	
+
 	@Override
 	public void run() {
 		while (go) {
 			try {
-				for (Container c : map.containers) {
+				for (Container c : containers) {
 					addRandomToContainer(c);
 				}
 				component.repaint();
@@ -37,9 +36,9 @@ public class ContainerThread extends Thread {
 
 	private void addRandomToContainer(Container c) {
 		try {
-			c.addToContainer(randGenerator.nextInt(2));
+			c.addToContainer(GarbageCollector.randGenerator.nextInt(2));
 		} catch (ContainerFullException e) {
-			//do nothing
+			// do nothing
 		}
 	}
 

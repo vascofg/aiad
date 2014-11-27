@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import algorithms.Dijkstra;
 import algorithms.Graph;
 import assets.Assets;
 import elements.MapElement;
@@ -25,6 +24,7 @@ public class Map {
 	public ArrayList<Container> containers;
 	public ArrayList<Road> roads;
 	public Road initialRoad;
+	public Graph graph;
 
 	public Map() {
 		this.mapMatrix = new ArrayList<ArrayList<MapElement>>();
@@ -33,21 +33,24 @@ public class Map {
 		this.roads = new ArrayList<Road>();
 	}
 
-	public MapElement getElement(int x, int y) throws IndexOutOfBoundsException {
+	public static MapElement getElement(int x, int y,
+			ArrayList<ArrayList<MapElement>> mapMatrix)
+			throws IndexOutOfBoundsException {
 		return mapMatrix.get(y).get(x);
 	}
 
-	public MapElement getAdjacentElement(MapElement element, int direction) {
+	public static MapElement getAdjacentElement(MapElement element,
+			int direction, ArrayList<ArrayList<MapElement>> mapMatrix) {
 		try {
 			switch (direction) {
 			case Assets.TOP:
-				return getElement(element.getX(), element.getY() - 1);
+				return getElement(element.getX(), element.getY() - 1, mapMatrix);
 			case Assets.BOTTOM:
-				return getElement(element.getX(), element.getY() + 1);
+				return getElement(element.getX(), element.getY() + 1, mapMatrix);
 			case Assets.LEFT:
-				return getElement(element.getX() - 1, element.getY());
+				return getElement(element.getX() - 1, element.getY(), mapMatrix);
 			case Assets.RIGHT:
-				return getElement(element.getX() + 1, element.getY());
+				return getElement(element.getX() + 1, element.getY(), mapMatrix);
 			default:
 				return null;
 			}
@@ -56,20 +59,22 @@ public class Map {
 		}
 	}
 
-	public Road getAdjacentRoad(MapElement element, int direction) {
+	public static Road getAdjacentRoad(MapElement element, int direction,
+			ArrayList<ArrayList<MapElement>> mapMatrix) {
 		try {
-			return (Road) getAdjacentElement(element, direction);
+			return (Road) getAdjacentElement(element, direction, mapMatrix);
 		} catch (ClassCastException e) {
 			return null;
 		}
 	}
 
-	public List<Road> getAllAdjacentRoads(MapElement element) {
+	public static List<Road> getAllAdjacentRoads(MapElement element,
+			ArrayList<ArrayList<MapElement>> mapMatrix) {
 		List<Road> list = new LinkedList<Road>();
-		Road topRoad = getAdjacentRoad(element, Assets.TOP);
-		Road bottomRoad = getAdjacentRoad(element, Assets.BOTTOM);
-		Road leftRoad = getAdjacentRoad(element, Assets.LEFT);
-		Road rightRoad = getAdjacentRoad(element, Assets.RIGHT);
+		Road topRoad = getAdjacentRoad(element, Assets.TOP, mapMatrix);
+		Road bottomRoad = getAdjacentRoad(element, Assets.BOTTOM, mapMatrix);
+		Road leftRoad = getAdjacentRoad(element, Assets.LEFT, mapMatrix);
+		Road rightRoad = getAdjacentRoad(element, Assets.RIGHT, mapMatrix);
 		if (topRoad != null)
 			list.add(topRoad);
 		if (bottomRoad != null)
@@ -81,20 +86,26 @@ public class Map {
 		return list;
 	}
 
-	public Container getAdjacentContainer(MapElement element, int direction) {
+	public static Container getAdjacentContainer(MapElement element,
+			int direction, ArrayList<ArrayList<MapElement>> mapMatrix) {
 		try {
-			return (Container) getAdjacentElement(element, direction);
+			return (Container) getAdjacentElement(element, direction, mapMatrix);
 		} catch (ClassCastException e) {
 			return null;
 		}
 	}
 
-	public List<Container> getAllAdjacentContainers(MapElement element) {
+	public static List<Container> getAllAdjacentContainers(MapElement element,
+			ArrayList<ArrayList<MapElement>> mapMatrix) {
 		List<Container> list = new LinkedList<Container>();
-		Container topContainer = getAdjacentContainer(element, Assets.TOP);
-		Container bottomContainer = getAdjacentContainer(element, Assets.BOTTOM);
-		Container leftContainer = getAdjacentContainer(element, Assets.LEFT);
-		Container rightContainer = getAdjacentContainer(element, Assets.RIGHT);
+		Container topContainer = getAdjacentContainer(element, Assets.TOP,
+				mapMatrix);
+		Container bottomContainer = getAdjacentContainer(element,
+				Assets.BOTTOM, mapMatrix);
+		Container leftContainer = getAdjacentContainer(element, Assets.LEFT,
+				mapMatrix);
+		Container rightContainer = getAdjacentContainer(element, Assets.RIGHT,
+				mapMatrix);
 		if (topContainer != null)
 			list.add(topContainer);
 		if (bottomContainer != null)
@@ -110,13 +121,13 @@ public class Map {
 		System.out.println("Initializing trucks...");
 		try {
 			trucks.add(new PlasticTruck(initialRoad, Truck.defaultCapacity,
-					containerController, "Plastico"));
+					containerController, "Plastico", this.mapMatrix));
 			trucks.add(new PaperTruck(initialRoad, Truck.defaultCapacity,
-					containerController, "Papel"));
+					containerController, "Papel", this.mapMatrix));
 			trucks.add(new GlassTruck(initialRoad, Truck.defaultCapacity,
-					containerController, "Vidro"));
+					containerController, "Vidro", this.mapMatrix));
 			trucks.add(new GarbageTruck(initialRoad, Truck.defaultCapacity,
-					containerController, "Lixo"));
+					containerController, "Lixo", this.mapMatrix));
 			containerController.createNewAgent("rma", "jade.tools.rma.rma",
 					new Object[0]).start();
 		} catch (StaleProxyException e) {
@@ -125,11 +136,22 @@ public class Map {
 		}
 	}
 
-	public void initRoads(Graph graph) {
-		System.out.println("Initializing roads...");
-		for (Road road : roads) {
-			road.dijkstra = new Dijkstra(graph);
-			road.dijkstra.execute(graph.getVertexByID(road.getID()));
+	public static ArrayList<ArrayList<MapElement>> cloneMapMatrix(
+			ArrayList<ArrayList<MapElement>> mapMatrix) {
+		ArrayList<ArrayList<MapElement>> returnMatrix = new ArrayList<ArrayList<MapElement>>();
+		for (ArrayList<MapElement> line : mapMatrix) {
+			ArrayList<MapElement> returnLine = new ArrayList<MapElement>();
+			for (MapElement element : line) {
+				returnLine.add(element.copy());
+			}
+			returnMatrix.add(returnLine);
 		}
+		return returnMatrix;
 	}
+	/*
+	 * public void initRoads(Graph graph) {
+	 * System.out.println("Initializing roads..."); for (Road road : roads) {
+	 * road.dijkstra = new Dijkstra(graph);
+	 * road.dijkstra.execute(graph.getVertexByID(road.getID())); } }
+	 */
 }

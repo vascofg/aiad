@@ -23,8 +23,8 @@ public class Graph {
 		}
 		for (Road road : map.roads) {
 			Vertex currentVertex = getVertexByID(road.getID());
-			List<Road> adjacentRoads = map
-					.getAllAdjacentRoads(road);
+			List<Road> adjacentRoads = Map.getAllAdjacentRoads(road,
+					map.mapMatrix);
 			for (Road adjacent : adjacentRoads) {
 				Vertex adjacentVertex = getVertexByID(adjacent.getID());
 				this.edges.add(new Edge(road.getID() + "->" + adjacent.getID(),

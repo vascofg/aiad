@@ -1,49 +1,43 @@
 package main;
 
-import java.util.List;
-import java.util.Random;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
-import map.Map;
-import elements.Road;
 import elements.trucks.Truck;
 
 public class TruckThread extends Thread {
 	private boolean go = true;
 	private static final int tickTime = 500; // in ms
-	private static Random randGenerator = new Random();
-	private Map map;
-	private JComponent component;
+	private ArrayList<Truck> trucks;
+	private JComponent truckComponent, mapComponent;
 
-	public TruckThread(Map map, JComponent component) {
-		this.map = map;
-		this.component = component;
+	public TruckThread(ArrayList<Truck> trucks, JComponent truckComponent,
+			JComponent containerComponent) {
+		this.trucks = trucks;
+		this.truckComponent = truckComponent;
+		this.mapComponent = containerComponent;
 	}
 
 	@Override
 	public void run() {
+		boolean changed = false;
 		while (go) {
 			try {
-				for (Truck truck : map.trucks) {
-					moveRandomDirection(truck);
+				for (Truck truck : trucks) {
+					if (truck.moveRandomDirection())
+						changed = true;
 				}
-				component.repaint();
+				if (changed) {
+					mapComponent.repaint();
+					changed = false;
+				}
+				truckComponent.repaint();
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
 				System.out.println("Thread interrupted, exiting");
 			}
 		}
-	}
-
-	// temporary
-	private void moveRandomDirection(Truck truck) {
-		List<Road> adjacentRoads = map.getAllAdjacentRoads(truck.getLocation());
-		truck.moveTruck(adjacentRoads.get(randGenerator.nextInt(adjacentRoads
-				.size())));
-		if (truck.emptyAdjacentContainers(map.getAllAdjacentContainers(truck
-				.getLocation()))) // if emptied any, have to repaint
-			component.repaint();
 	}
 
 	@Override

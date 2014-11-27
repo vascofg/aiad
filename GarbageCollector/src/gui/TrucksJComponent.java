@@ -20,7 +20,7 @@ public class TrucksJComponent extends JComponent {
 	public TrucksJComponent(Map map) {
 		this.map = map;
 	}
-	
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		for (Truck truck : map.trucks) {

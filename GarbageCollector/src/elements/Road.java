@@ -10,10 +10,10 @@ public class Road extends MapElement implements DrawableElement {
 	public Dijkstra dijkstra;
 
 	public Road(int x, int y, boolean twoWay) {
-		super(x,y);
+		super(x, y);
 		this.twoWay = twoWay;
 	}
-	
+
 	public String getID() {
 		return (this.getX() + "|" + this.getY());
 	}
@@ -21,5 +21,10 @@ public class Road extends MapElement implements DrawableElement {
 	@Override
 	public BufferedImage getImg() {
 		return Assets.asphalt;
+	}
+
+	@Override
+	public Road copy() {
+		return this;
 	}
 }

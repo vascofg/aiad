@@ -4,8 +4,10 @@ import files.FileParser;
 import gui.MapJFrame;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
+
+import java.util.Random;
+
 import map.Map;
-import algorithms.Graph;
 import assets.Assets;
 
 public class GarbageCollector {
@@ -15,14 +17,16 @@ public class GarbageCollector {
 	private static TruckThread truckThread;
 	private static ContainerThread containerThread;
 	private static ContainerController containerController;
+	public static Random randGenerator = new Random();
+
+	/* private agente mundo */
 
 	public static void main(String[] args) {
 		containerController = jade.core.Runtime.instance().createMainContainer(
 				new ProfileImpl(true));
 		Assets.loadAssets();
 		map = FileParser.parseFile("maps/simple.txt");
-		Graph graph = new Graph(map);
-		map.initRoads(graph);
+		// map.initRoads(graph);
 		map.initTrucks(containerController);
 
 		// Schedule a job for the event-dispatching thread:
@@ -30,9 +34,11 @@ public class GarbageCollector {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				frame = new MapJFrame("Garbage Collector", map);
-				truckThread = new TruckThread(map, frame.trucksComponent);
+				truckThread = new TruckThread(map.trucks,
+						frame.trucksComponent, frame.mapComponent);
 				truckThread.start();
-				containerThread = new ContainerThread(map, frame.mapComponent);
+				containerThread = new ContainerThread(map.containers,
+						frame.mapComponent);
 				containerThread.start();
 			}
 		});

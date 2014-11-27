@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import map.Map;
+import algorithms.Graph;
 import elements.Deposit;
 import elements.Grass;
 import elements.MapElement;
@@ -94,6 +95,7 @@ public class FileParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		map.graph = new Graph(map);
 		return map;
 	}
 }

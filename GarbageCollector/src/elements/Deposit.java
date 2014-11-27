@@ -13,4 +13,9 @@ public class Deposit extends MapElement implements DrawableElement {
 	public BufferedImage getImg() {
 		return Assets.deposit;
 	}
+
+	@Override
+	public Deposit copy() {
+		return this;
+	}
 }
