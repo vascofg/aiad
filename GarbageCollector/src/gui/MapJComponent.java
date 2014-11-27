@@ -31,7 +31,8 @@ public class MapJComponent extends JComponent {
 				BufferedImage img = element.getImg();
 				if (img != null)
 					g.drawImage(img, x * Assets.imgDim.width, y
-							* Assets.imgDim.height, null);
+							* Assets.imgDim.height, Assets.imgDim.width,
+							Assets.imgDim.height, null);
 			}
 		}
 		super.paintComponent(g);

@@ -27,7 +27,8 @@ public class TrucksJComponent extends JComponent {
 			BufferedImage img = truck.getImg();
 			if (img != null) {
 				g.drawImage(img, truck.getLocation().x * Assets.imgDim.width,
-						truck.getLocation().y * Assets.imgDim.height, null);
+						truck.getLocation().y * Assets.imgDim.height,
+						Assets.imgDim.width, Assets.imgDim.height, null);
 			}
 		}
 		super.paintComponent(g);
