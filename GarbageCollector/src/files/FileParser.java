@@ -27,6 +27,9 @@ public class FileParser {
 			String line;
 			Road road;
 			Container container;
+			Grass grass = new Grass();
+			Deposit deposit = new Deposit();
+			// they are all the same
 			int x = 0, y = 0;
 			while ((line = in.readLine()) != null) {
 				if (line.isEmpty() || line.charAt(0) == '#')
@@ -35,7 +38,7 @@ public class FileParser {
 				for (char c : line.toCharArray()) {
 					switch (c) {
 					case '-': // wall
-						lineList.add(new Grass(x, y));
+						lineList.add(grass);
 						break;
 					case 'r': // one way road
 						road = new Road(x, y, false);
@@ -52,31 +55,31 @@ public class FileParser {
 						map.roads.add(road);
 						break;
 					case 'V': // glass container
-						container = new GlassContainer(x, y,
+						container = new GlassContainer(
 								Container.defaultCapacity);
 						lineList.add(container);
 						map.containers.add(container);
 						break;
 					case 'E': // plastic container
-						container = new PlasticContainer(x, y,
+						container = new PlasticContainer(
 								Container.defaultCapacity);
 						lineList.add(container);
 						map.containers.add(container);
 						break;
 					case 'P': // paper container
-						container = new PaperContainer(x, y,
+						container = new PaperContainer(
 								Container.defaultCapacity);
 						lineList.add(container);
 						map.containers.add(container);
 						break;
 					case 'I': // garbage container
-						container = new GarbageContainer(x, y,
+						container = new GarbageContainer(
 								Container.defaultCapacity);
 						lineList.add(container);
 						map.containers.add(container);
 						break;
 					case 'D': // deposit
-						lineList.add(new Deposit(x, y));
+						lineList.add(deposit);
 						break;
 					default:
 						System.out.println("Character>" + c);

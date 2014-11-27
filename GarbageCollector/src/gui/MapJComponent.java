@@ -24,12 +24,14 @@ public class MapJComponent extends JComponent {
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		for (ArrayList<MapElement> line : map.mapMatrix) {
-			for (MapElement element : line) {
+		for (int y = 0; y < map.mapMatrix.size(); y++) {
+			ArrayList<MapElement> line = map.mapMatrix.get(y);
+			for (int x = 0; x < line.size(); x++) {
+				MapElement element = line.get(x);
 				BufferedImage img = element.getImg();
 				if (img != null)
-					g.drawImage(img, element.getX() * Assets.imgDim.width,
-							element.getY() * Assets.imgDim.height, null);
+					g.drawImage(img, x * Assets.imgDim.width, y
+							* Assets.imgDim.height, null);
 			}
 		}
 		super.paintComponent(g);

@@ -7,12 +7,12 @@ import elements.DrawableElement;
 
 public class PaperContainer extends Container implements DrawableElement {
 
-	public PaperContainer(int x, int y, int capacity) {
-		super(x, y, capacity);
+	public PaperContainer(int capacity) {
+		super(capacity);
 	}
 
 	public PaperContainer(PaperContainer other) {
-		super(other.x, other.y, null);
+		super(null);
 	}
 
 	@Override

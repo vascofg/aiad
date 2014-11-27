@@ -1,5 +1,6 @@
 package map;
 
+import jade.core.NotFoundException;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
@@ -33,28 +34,41 @@ public class Map {
 		this.roads = new ArrayList<Road>();
 	}
 
-	public static MapElement getElement(int x, int y,
+	public static int[] getElementIndexes(MapElement toFind,
 			ArrayList<ArrayList<MapElement>> mapMatrix)
-			throws IndexOutOfBoundsException {
-		return mapMatrix.get(y).get(x);
+			throws NotFoundException {
+		int[] indexes = new int[2];
+		for (int y = 0; y < mapMatrix.size(); y++) {
+			indexes[1] = y;
+			ArrayList<MapElement> line = mapMatrix.get(y);
+			for (int x = 0; x < line.size(); x++) {
+				indexes[0] = x;
+				if (line.get(x).equals(toFind))
+					return indexes;
+			}
+		}
+		throw new NotFoundException();
 	}
 
 	public static MapElement getAdjacentElement(MapElement element,
 			int direction, ArrayList<ArrayList<MapElement>> mapMatrix) {
 		try {
+			int[] indexes = Map.getElementIndexes(element, mapMatrix);
+			int x = indexes[0], y = indexes[1];
+
 			switch (direction) {
 			case Assets.TOP:
-				return getElement(element.getX(), element.getY() - 1, mapMatrix);
+				return mapMatrix.get(y - 1).get(x);
 			case Assets.BOTTOM:
-				return getElement(element.getX(), element.getY() + 1, mapMatrix);
+				return mapMatrix.get(y + 1).get(x);
 			case Assets.LEFT:
-				return getElement(element.getX() - 1, element.getY(), mapMatrix);
+				return mapMatrix.get(y).get(x - 1);
 			case Assets.RIGHT:
-				return getElement(element.getX() + 1, element.getY(), mapMatrix);
+				return mapMatrix.get(y).get(x + 1);
 			default:
 				return null;
 			}
-		} catch (IndexOutOfBoundsException e) {
+		} catch (NotFoundException e) {
 			return null;
 		}
 	}

@@ -7,12 +7,12 @@ import elements.DrawableElement;
 
 public class GarbageContainer extends Container implements DrawableElement {
 
-	public GarbageContainer(int x, int y, int capacity) {
-		super(x, y, capacity);
+	public GarbageContainer(int capacity) {
+		super(capacity);
 	}
 
 	public GarbageContainer(GarbageContainer other) {
-		super(other.x, other.y, null);
+		super(null);
 	}
 
 	@Override

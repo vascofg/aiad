@@ -1,5 +1,6 @@
 package elements.trucks;
 
+import jade.core.NotFoundException;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
@@ -80,8 +81,10 @@ public abstract class Truck implements DrawableElement {
 			} else { // inform other trucks
 				// TODO: Send used capacity?
 				try {
-					informGarbage(c.getType(), c.getX(), c.getY());
-				} catch (StaleProxyException e) {
+					int[] indexes = Map.getElementIndexes(c, mapMatrix);
+					int x = indexes[0], y = indexes[1];
+					informGarbage(c.getType(), x, y);
+				} catch (StaleProxyException | NotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

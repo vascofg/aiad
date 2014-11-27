@@ -10,8 +10,7 @@ public abstract class Container extends MapElement {
 
 	Integer capacity, usedCapacity;
 
-	public Container(int x, int y, Integer capacity) {
-		super(x, y);
+	public Container(Integer capacity) {
 		this.capacity = capacity;
 		if (this.capacity != null)
 			this.usedCapacity = 0;
