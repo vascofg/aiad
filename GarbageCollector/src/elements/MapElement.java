@@ -4,5 +4,5 @@ package elements;
 public abstract class MapElement implements DrawableElement {
 
 	public abstract MapElement copy();
-	
+
 }

@@ -1,10 +1,10 @@
 package elements.trucks;
 
-import jade.core.NotFoundException;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +21,12 @@ public abstract class Truck implements DrawableElement {
 
 	public static int defaultCapacity = 20;
 
-	private Road currentLocation;
+	private Point currentLocation;
 	private ArrayList<ArrayList<MapElement>> mapMatrix;
 	public AgentController agentController;
 	int capacity, usedCapacity;
 
-	public Truck(Road initialLocation, int capacity,
+	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String agentName,
 			int agentType, ArrayList<ArrayList<MapElement>> mapMatrix)
 			throws StaleProxyException {
@@ -41,7 +41,7 @@ public abstract class Truck implements DrawableElement {
 
 	public abstract int getType();
 
-	public Road getLocation() {
+	public Point getLocation() {
 		return this.currentLocation;
 	}
 
@@ -56,7 +56,7 @@ public abstract class Truck implements DrawableElement {
 		this.usedCapacity = 0;
 	}
 
-	public boolean moveTruck(Road destination) {
+	public boolean moveTruck(Point destination) {
 		if (true) { // TODO: verificar se há algum truck no caminho
 			// TODO: notificar agente mundo
 			this.currentLocation = destination;
@@ -81,10 +81,9 @@ public abstract class Truck implements DrawableElement {
 			} else { // inform other trucks
 				// TODO: Send used capacity?
 				try {
-					int[] indexes = Map.getElementIndexes(c, mapMatrix);
-					int x = indexes[0], y = indexes[1];
-					informGarbage(c.getType(), x, y);
-				} catch (StaleProxyException | NotFoundException e) {
+					informGarbage(c.getType(), currentLocation.x,
+							currentLocation.y);
+				} catch (StaleProxyException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -102,12 +101,12 @@ public abstract class Truck implements DrawableElement {
 
 	// temporary
 	public boolean moveRandomDirection() {
-		List<Road> adjacentRoads = Map.getAllAdjacentRoads(getLocation(),
-				mapMatrix);
-		moveTruck(adjacentRoads.get(GarbageCollector.randGenerator
-				.nextInt(adjacentRoads.size())));
+		List<Point> possibleMoves = Map.getAllAdjacentPoints(Road.class,
+				getLocation(), mapMatrix);
+		moveTruck(possibleMoves.get(GarbageCollector.randGenerator
+				.nextInt(possibleMoves.size())));
 		// if emptied any, return to repaint...
-		return emptyAdjacentContainers(Map.getAllAdjacentContainers(
-				getLocation(), mapMatrix));
+		return emptyAdjacentContainers(Map.getAllAdjacentElements(
+				Container.class, getLocation(), mapMatrix));
 	}
 }

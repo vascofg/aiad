@@ -1,5 +1,6 @@
 package files;
 
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -42,15 +43,15 @@ public class FileParser {
 						break;
 					case 'r': // one way road
 						road = new Road(x, y, false);
-						if (map.initialRoad == null)
-							map.initialRoad = road;
+						if (map.initialLocation == null)
+							map.initialLocation = new Point(x, y);
 						lineList.add(road);
 						map.roads.add(road);
 						break;
 					case 'R': // two way road
 						road = new Road(x, y, true);
-						if (map.initialRoad == null)
-							map.initialRoad = road;
+						if (map.initialLocation == null)
+							map.initialLocation = new Point(x, y);
 						lineList.add(road);
 						map.roads.add(road);
 						break;

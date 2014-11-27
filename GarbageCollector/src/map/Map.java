@@ -1,9 +1,9 @@
 package map;
 
-import jade.core.NotFoundException;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class Map {
 	public ArrayList<Truck> trucks;
 	public ArrayList<Container> containers;
 	public ArrayList<Road> roads;
-	public Road initialRoad;
+	public Point initialLocation;
 	public Graph graph;
 
 	public Map() {
@@ -34,113 +34,96 @@ public class Map {
 		this.roads = new ArrayList<Road>();
 	}
 
-	public static int[] getElementIndexes(MapElement toFind,
-			ArrayList<ArrayList<MapElement>> mapMatrix)
-			throws NotFoundException {
-		int[] indexes = new int[2];
+	private static <T extends MapElement> T getElement(Class<T> clazz,
+			Point point, ArrayList<ArrayList<MapElement>> mapMatrix) {
+		try {
+			return clazz.cast(mapMatrix.get(point.y).get(point.x));
+		} catch (ClassCastException | IndexOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	private static Point getAdjacentPoint(Point location, int direction) {
+		switch (direction) {
+		case Assets.TOP:
+			return new Point(location.x, location.y - 1);
+		case Assets.BOTTOM:
+			return new Point(location.x, location.y + 1);
+		case Assets.LEFT:
+			return new Point(location.x - 1, location.y);
+		case Assets.RIGHT:
+			return new Point(location.x + 1, location.y);
+		default:
+			// should never happen
+			return null;
+		}
+	}
+
+	public static <T extends MapElement> Point findElement(Class<T> clazz,
+			T toFind, ArrayList<ArrayList<MapElement>> mapMatrix) {
+		Point point = new Point();
 		for (int y = 0; y < mapMatrix.size(); y++) {
-			indexes[1] = y;
-			ArrayList<MapElement> line = mapMatrix.get(y);
-			for (int x = 0; x < line.size(); x++) {
-				indexes[0] = x;
-				if (line.get(x).equals(toFind))
-					return indexes;
+			point.y = y;
+			for (int x = 0; x < mapMatrix.get(0).size(); x++) {
+				point.x = x;
+				T element = Map.<T> getElement(clazz, point, mapMatrix);
+				try {
+					if (element.equals(toFind))
+						return point;
+				} catch (NullPointerException e) {
+
+				}
 			}
 		}
-		throw new NotFoundException();
+		return null;
 	}
 
-	public static MapElement getAdjacentElement(MapElement element,
-			int direction, ArrayList<ArrayList<MapElement>> mapMatrix) {
-		try {
-			int[] indexes = Map.getElementIndexes(element, mapMatrix);
-			int x = indexes[0], y = indexes[1];
-
-			switch (direction) {
-			case Assets.TOP:
-				return mapMatrix.get(y - 1).get(x);
-			case Assets.BOTTOM:
-				return mapMatrix.get(y + 1).get(x);
-			case Assets.LEFT:
-				return mapMatrix.get(y).get(x - 1);
-			case Assets.RIGHT:
-				return mapMatrix.get(y).get(x + 1);
-			default:
-				return null;
-			}
-		} catch (NotFoundException e) {
-			return null;
-		}
-	}
-
-	public static Road getAdjacentRoad(MapElement element, int direction,
+	public static <T extends MapElement> List<Point> getAllAdjacentPoints(
+			Class<T> clazz, Point location,
 			ArrayList<ArrayList<MapElement>> mapMatrix) {
-		try {
-			return (Road) getAdjacentElement(element, direction, mapMatrix);
-		} catch (ClassCastException e) {
-			return null;
-		}
-	}
+		List<Point> list = new LinkedList<>();
 
-	public static List<Road> getAllAdjacentRoads(MapElement element,
-			ArrayList<ArrayList<MapElement>> mapMatrix) {
-		List<Road> list = new LinkedList<Road>();
-		Road topRoad = getAdjacentRoad(element, Assets.TOP, mapMatrix);
-		Road bottomRoad = getAdjacentRoad(element, Assets.BOTTOM, mapMatrix);
-		Road leftRoad = getAdjacentRoad(element, Assets.LEFT, mapMatrix);
-		Road rightRoad = getAdjacentRoad(element, Assets.RIGHT, mapMatrix);
-		if (topRoad != null)
-			list.add(topRoad);
-		if (bottomRoad != null)
-			list.add(bottomRoad);
-		if (leftRoad != null)
-			list.add(leftRoad);
-		if (rightRoad != null)
-			list.add(rightRoad);
+		Point topPoint = getAdjacentPoint(location, Assets.TOP);
+		Point bottomPoint = getAdjacentPoint(location, Assets.BOTTOM);
+		Point leftPoint = getAdjacentPoint(location, Assets.LEFT);
+		Point rightPoint = getAdjacentPoint(location, Assets.RIGHT);
+
+		T topElement = getElement(clazz, topPoint, mapMatrix);
+		T bottomElement = getElement(clazz, bottomPoint, mapMatrix);
+		T leftElement = getElement(clazz, leftPoint, mapMatrix);
+		T rightElement = getElement(clazz, rightPoint, mapMatrix);
+		if (topElement != null)
+			list.add(topPoint);
+		if (bottomElement != null)
+			list.add(bottomPoint);
+		if (leftElement != null)
+			list.add(leftPoint);
+		if (rightElement != null)
+			list.add(rightPoint);
 		return list;
 	}
 
-	public static Container getAdjacentContainer(MapElement element,
-			int direction, ArrayList<ArrayList<MapElement>> mapMatrix) {
-		try {
-			return (Container) getAdjacentElement(element, direction, mapMatrix);
-		} catch (ClassCastException e) {
-			return null;
-		}
-	}
-
-	public static List<Container> getAllAdjacentContainers(MapElement element,
+	public static <T extends MapElement> List<T> getAllAdjacentElements(
+			Class<T> clazz, Point location,
 			ArrayList<ArrayList<MapElement>> mapMatrix) {
-		List<Container> list = new LinkedList<Container>();
-		Container topContainer = getAdjacentContainer(element, Assets.TOP,
-				mapMatrix);
-		Container bottomContainer = getAdjacentContainer(element,
-				Assets.BOTTOM, mapMatrix);
-		Container leftContainer = getAdjacentContainer(element, Assets.LEFT,
-				mapMatrix);
-		Container rightContainer = getAdjacentContainer(element, Assets.RIGHT,
-				mapMatrix);
-		if (topContainer != null)
-			list.add(topContainer);
-		if (bottomContainer != null)
-			list.add(bottomContainer);
-		if (leftContainer != null)
-			list.add(leftContainer);
-		if (rightContainer != null)
-			list.add(rightContainer);
-		return list;
+		List<Point> points = getAllAdjacentPoints(clazz, location, mapMatrix);
+		List<T> elements = new LinkedList<>();
+		for (Point point : points) {
+			elements.add(Map.<T> getElement(clazz, point, mapMatrix));
+		}
+		return elements;
 	}
 
 	public void initTrucks(ContainerController containerController) {
 		System.out.println("Initializing trucks...");
 		try {
-			trucks.add(new PlasticTruck(initialRoad, Truck.defaultCapacity,
+			trucks.add(new PlasticTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Plastico", this.mapMatrix));
-			trucks.add(new PaperTruck(initialRoad, Truck.defaultCapacity,
+			trucks.add(new PaperTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Papel", this.mapMatrix));
-			trucks.add(new GlassTruck(initialRoad, Truck.defaultCapacity,
+			trucks.add(new GlassTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Vidro", this.mapMatrix));
-			trucks.add(new GarbageTruck(initialRoad, Truck.defaultCapacity,
+			trucks.add(new GarbageTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Lixo", this.mapMatrix));
 			containerController.createNewAgent("rma", "jade.tools.rma.rma",
 					new Object[0]).start();

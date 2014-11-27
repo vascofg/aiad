@@ -69,7 +69,8 @@ public class TruckAgent extends Agent {
 					// pesquisa DF por agentes "ping"
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd1 = new ServiceDescription();
-					sd1.setType(args[0]); // agentes que recebem mensagem s�o do
+					sd1.setType(args[0]); // agentes que recebem mensagem s�o
+											// do
 											// mesmo tipo que o lixo
 					template.addServices(sd1);
 					try {

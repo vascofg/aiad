@@ -1,7 +1,5 @@
 package gui;
 
-import jade.core.NotFoundException;
-
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -28,15 +26,8 @@ public class TrucksJComponent extends JComponent {
 		for (Truck truck : map.trucks) {
 			BufferedImage img = truck.getImg();
 			if (img != null) {
-				try {
-					int[] indexes = Map.getElementIndexes(truck.getLocation(),
-							map.mapMatrix);
-					int x = indexes[0], y = indexes[1];
-					g.drawImage(img, x * Assets.imgDim.width, y
-							* Assets.imgDim.height, null);
-				} catch (NotFoundException e) {
-					e.printStackTrace();
-				}
+				g.drawImage(img, truck.getLocation().x * Assets.imgDim.width,
+						truck.getLocation().y * Assets.imgDim.height, null);
 			}
 		}
 		super.paintComponent(g);
