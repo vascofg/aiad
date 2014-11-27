@@ -16,6 +16,7 @@ public class Graph {
 	}
 
 	public Graph(Map map) {
+		System.out.println("Creating graph...");
 		this.vertexes = new ArrayList<Vertex>();
 		this.edges = new ArrayList<Edge>();
 		for (Road road : map.roads) {
@@ -32,6 +33,8 @@ public class Graph {
 						currentVertex, adjacentVertex, 1));
 			}
 		}
+		System.out.println("Processed " + this.vertexes.size() + " vertexes and "
+				+ this.edges.size() + " edges");
 	}
 
 	public List<Vertex> getVertexes() {

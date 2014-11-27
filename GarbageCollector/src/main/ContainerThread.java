@@ -19,6 +19,12 @@ public class ContainerThread extends Thread {
 	}
 
 	@Override
+	public synchronized void start() {
+		System.out.println("Starting container thread...");
+		super.start();
+	}
+
+	@Override
 	public void run() {
 		while (go) {
 			try {
@@ -28,7 +34,7 @@ public class ContainerThread extends Thread {
 				component.repaint();
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
-				System.out.println("Thread interrupted, exiting");
+				System.out.println("Container thread interrupted, exiting");
 			}
 		}
 	}

@@ -65,29 +65,36 @@ public abstract class Truck implements DrawableElement {
 		return false;
 	}
 
-	public boolean emptyAdjacentContainers(List<Container> adjacentContainers) {
+	public boolean emptyAdjacentContainers(List<Container> adjacentContainers,
+			List<Point> adjacentContainerPoints) {
 		boolean emptiedAny = false;
-		for (Container c : adjacentContainers) {
-			// pergunta usedCapacity
-			// if (c.getUsedCapacity() > 0) {
-			if (c.truckCompatible(this)) {
-				// esvazia
-				/*
-				 * try { this.addToTruck(c.getUsedCapacity());
-				 * c.emptyContainer(); emptiedAny = true; } catch
-				 * (TruckFullException e) { // TODO: inform trucks of same //
-				 * type //avisa outros do mm tipo break; }
-				 */
-			} else { // inform other trucks
-				// TODO: Send used capacity?
-				try {
-					informGarbage(c.getType(), currentLocation.x,
-							currentLocation.y);
-				} catch (StaleProxyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		try {
+			for (int i = 0; i < adjacentContainers.size(); i++) {
+				Container c = adjacentContainers.get(i);
+				Point p = adjacentContainerPoints.get(i);
+
+				// pergunta usedCapacity
+				// if (c.getUsedCapacity() > 0) {
+				if (c.truckCompatible(this)) {
+					System.out.println("TruckAgent "
+							+ this.agentController.getName()
+							+ " emptied container at: " + p.x + " " + p.y);
+					// esvazia
+					/*
+					 * try { this.addToTruck(c.getUsedCapacity());
+					 * c.emptyContainer(); emptiedAny = true; } catch
+					 * (TruckFullException e) { // TODO: inform trucks of same
+					 * // type //avisa outros do mm tipo break; }
+					 */
+				} else { // inform other trucks
+					// TODO: Send used capacity?
+					informGarbage(c.getType(), p.x, p.y);
+
 				}
 			}
+		} catch (StaleProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		// }
 		return emptiedAny;
@@ -107,6 +114,8 @@ public abstract class Truck implements DrawableElement {
 				.nextInt(possibleMoves.size())));
 		// if emptied any, return to repaint...
 		return emptyAdjacentContainers(Map.getAllAdjacentElements(
-				Container.class, getLocation(), mapMatrix));
+				Container.class, getLocation(), mapMatrix),
+				Map.getAllAdjacentPoints(Container.class, getLocation(),
+						mapMatrix));
 	}
 }

@@ -21,6 +21,7 @@ import elements.containers.PlasticContainer;
 
 public class FileParser {
 	public static Map parseFile(String name) {
+		System.out.println("Parsing map file...");
 		Map map = new Map();
 		BufferedReader in;
 		try {
@@ -31,6 +32,7 @@ public class FileParser {
 			Grass grass = new Grass();
 			Deposit deposit = new Deposit();
 			// they are all the same
+			long count = 0;
 			int x = 0, y = 0;
 			while ((line = in.readLine()) != null) {
 				if (line.isEmpty() || line.charAt(0) == '#')
@@ -88,18 +90,21 @@ public class FileParser {
 					}
 					x++;
 				}
+				count += x;
 				x = 0;
 				y++;
 				map.mapMatrix.add(lineList);
 			}
 			in.close();
+			System.out.println("Parsed " + count + " elements");
+			map.graph = new Graph(map);
+			return map;
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found!");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		map.graph = new Graph(map);
-		return map;
+		return null;
 	}
 }

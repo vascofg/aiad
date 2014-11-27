@@ -20,6 +20,12 @@ public class TruckThread extends Thread {
 	}
 
 	@Override
+	public synchronized void start() {
+		System.out.println("Starting truck thread...");
+		super.start();
+	}
+
+	@Override
 	public void run() {
 		boolean changed = false;
 		while (go) {
@@ -35,7 +41,7 @@ public class TruckThread extends Thread {
 				truckComponent.repaint();
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
-				System.out.println("Thread interrupted, exiting");
+				System.out.println("Truck thread interrupted, exiting");
 			}
 		}
 	}

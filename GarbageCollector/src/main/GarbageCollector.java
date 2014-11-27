@@ -4,6 +4,7 @@ import files.FileParser;
 import gui.MapJFrame;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
 
 import java.util.Random;
 
@@ -21,9 +22,22 @@ public class GarbageCollector {
 
 	/* private agente mundo */
 
+	private static ContainerController startJADE() {
+		ContainerController c = jade.core.Runtime.instance()
+				.createMainContainer(new ProfileImpl(true));
+		try {
+			c.createNewAgent("rma", "jade.tools.rma.rma", new Object[0])
+					.start();
+		} catch (StaleProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return c;
+	}
+
 	public static void main(String[] args) {
-		containerController = jade.core.Runtime.instance().createMainContainer(
-				new ProfileImpl(true));
+		System.out.println("Starting JADE...");
+		containerController = startJADE();
 		Assets.loadAssets();
 		map = FileParser.parseFile("maps/simple.txt");
 		// map.initRoads(graph);

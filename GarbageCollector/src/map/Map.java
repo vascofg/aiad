@@ -125,8 +125,6 @@ public class Map {
 					containerController, "Vidro", this.mapMatrix));
 			trucks.add(new GarbageTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Lixo", this.mapMatrix));
-			containerController.createNewAgent("rma", "jade.tools.rma.rma",
-					new Object[0]).start();
 		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

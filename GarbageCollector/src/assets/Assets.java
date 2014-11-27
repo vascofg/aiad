@@ -22,6 +22,7 @@ public abstract class Assets {
 
 	public static void loadAssets() {
 		try {
+			System.out.println("Loading assets...");
 			grass = ImageIO.read(new File("img/grass.png"));
 			asphalt = ImageIO.read(new File("img/asphalt.png"));
 			glassContainer = ImageIO.read(new File("img/glasscontainer.png"));
