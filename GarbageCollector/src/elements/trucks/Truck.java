@@ -75,10 +75,8 @@ public abstract class Truck implements DrawableElement {
 
 				// pergunta usedCapacity
 				// if (c.getUsedCapacity() > 0) {
-				if (c.truckCompatible(this)) {
-					System.out.println("TruckAgent "
-							+ this.agentController.getName()
-							+ " emptied container at: " + p.x + " " + p.y);
+				containerRequest(c.getType(), p.x, p.y);
+				if (c.truckCompatible(this)) { //my type
 					// esvazia
 					/*
 					 * try { this.addToTruck(c.getUsedCapacity());
@@ -86,10 +84,6 @@ public abstract class Truck implements DrawableElement {
 					 * (TruckFullException e) { // TODO: inform trucks of same
 					 * // type //avisa outros do mm tipo break; }
 					 */
-				} else { // inform other trucks
-					// TODO: Send used capacity?
-					informGarbage(c.getType(), p.x, p.y);
-
 				}
 			}
 		} catch (StaleProxyException e) {
@@ -100,7 +94,7 @@ public abstract class Truck implements DrawableElement {
 		return emptiedAny;
 	}
 
-	public void informGarbage(int garbageType, int X, int Y)
+	public void containerRequest(int garbageType, int X, int Y)
 			throws StaleProxyException {
 		StringBuilder sb = new StringBuilder(garbageType + " " + X + " " + Y);
 		this.agentController.putO2AObject(sb.toString(), false);

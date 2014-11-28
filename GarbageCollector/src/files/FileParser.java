@@ -1,5 +1,8 @@
 package files;
 
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
+
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -20,7 +23,7 @@ import elements.containers.PaperContainer;
 import elements.containers.PlasticContainer;
 
 public class FileParser {
-	public static Map parseFile(String name) {
+	public static Map parseFile(String name, ContainerController containerController) {
 		System.out.println("Parsing map file...");
 		Map map = new Map();
 		BufferedReader in;
@@ -98,10 +101,15 @@ public class FileParser {
 			in.close();
 			System.out.println("Parsed " + count + " elements");
 			map.graph = new Graph(map);
+			map.worldAgent = containerController.createNewAgent("World", "agents.WorldAgent", new Object[0]);
+			map.worldAgent.start();
 			return map;
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found!");
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

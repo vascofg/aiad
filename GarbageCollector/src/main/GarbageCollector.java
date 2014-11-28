@@ -39,7 +39,7 @@ public class GarbageCollector {
 		System.out.println("Starting JADE...");
 		containerController = startJADE();
 		Assets.loadAssets();
-		map = FileParser.parseFile("maps/simple.txt");
+		map = FileParser.parseFile("maps/simple.txt", containerController);
 		// map.initRoads(graph);
 		map.initTrucks(containerController);
 

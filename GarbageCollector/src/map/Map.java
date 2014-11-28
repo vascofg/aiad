@@ -1,5 +1,6 @@
 package map;
 
+import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
@@ -26,6 +27,7 @@ public class Map {
 	public ArrayList<Road> roads;
 	public Point initialLocation;
 	public Graph graph;
+	public AgentController worldAgent;
 
 	public Map() {
 		this.mapMatrix = new ArrayList<ArrayList<MapElement>>();

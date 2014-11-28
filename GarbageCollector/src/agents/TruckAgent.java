@@ -13,6 +13,7 @@ public class TruckAgent extends Agent {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private String type;
 
 	// método setup
 	protected void setup() {
@@ -21,7 +22,8 @@ public class TruckAgent extends Agent {
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setName(getName());
-		sd.setType(String.valueOf(this.getArguments()[0]));
+		this.type = String.valueOf(this.getArguments()[0]);
+		sd.setType(this.type);
 		setEnabledO2ACommunication(true, 0);
 		System.out.println("Created TruckAgent " + getName() + " with type: "
 				+ sd.getType());
@@ -32,7 +34,7 @@ public class TruckAgent extends Agent {
 			e.printStackTrace();
 		}
 
-		// adiciona behaviour ciclico (ler mensagem)
+		// adiciona behaviour ciclico (ler inform lixo)
 		addBehaviour(new CyclicBehaviour(this) {
 			private static final long serialVersionUID = 1L;
 
@@ -66,17 +68,29 @@ public class TruckAgent extends Agent {
 					String[] args = messageContent.split("\\s+");
 					String toSend = new String(args[1] + " " + args[2]);
 
-					// pesquisa DF por agentes "ping"
+					// pesquisa DF por agentes do tipo de lixo respectivo
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd1 = new ServiceDescription();
-					sd1.setType(args[0]); // agentes que recebem mensagem s�o
-											// do
-											// mesmo tipo que o lixo
+					String thisAgentType = ((TruckAgent) myAgent).type;
+
+					ACLMessage msg;
+
+					if (thisAgentType.equals(args[0])) // mesmo tipo, perguntar
+														// ao mundo
+					{
+						sd1.setType("World");
+						msg = new ACLMessage(ACLMessage.REQUEST);
+					} else {
+						sd1.setType(args[0]); // agentes que recebem mensagem
+												// s�o
+												// do
+												// mesmo tipo que o lixo
+						msg = new ACLMessage(ACLMessage.INFORM);
+					}
 					template.addServices(sd1);
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent,
 								template);
-						ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 						for (int i = 0; i < result.length; ++i)
 							msg.addReceiver(result[i].getName());
 						msg.setContent(toSend);
