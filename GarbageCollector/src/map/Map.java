@@ -119,14 +119,26 @@ public class Map {
 	public void initTrucks(ContainerController containerController) {
 		System.out.println("Initializing trucks...");
 		try {
-			trucks.add(new PlasticTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Plastico", this.mapMatrix));
-			trucks.add(new PaperTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Papel", this.mapMatrix));
-			trucks.add(new GlassTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Vidro", this.mapMatrix));
-			trucks.add(new GarbageTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Lixo", this.mapMatrix));
+			PlasticTruck plastic = new PlasticTruck(initialLocation, Truck.defaultCapacity,
+					containerController, "Plastico", this.mapMatrix);
+			trucks.add(plastic);
+			plastic.start();
+			
+			PaperTruck paper = new PaperTruck(initialLocation, Truck.defaultCapacity,
+					containerController, "Papel", this.mapMatrix);
+			trucks.add(paper);
+			paper.start();
+			
+			GlassTruck glass = new GlassTruck(initialLocation, Truck.defaultCapacity,
+					containerController, "Vidro", this.mapMatrix);
+			trucks.add(glass);
+			glass.start();
+			
+			
+			GarbageTruck garbage = new GarbageTruck(initialLocation, Truck.defaultCapacity,
+					containerController, "Lixo", this.mapMatrix);
+			trucks.add(garbage);
+			garbage.start();
 		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

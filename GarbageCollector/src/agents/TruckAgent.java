@@ -7,13 +7,16 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.util.Event;
 
 public class TruckAgent extends Agent {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String type;
+	protected Event event;
+	public static final int CONTAINERCAPACITY = 1, MOVE = 2,
+			INFORMOTHERTRUCKS = 3;
 
 	// método setup
 	protected void setup() {
@@ -22,8 +25,7 @@ public class TruckAgent extends Agent {
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
 		sd.setName(getName());
-		this.type = String.valueOf(this.getArguments()[0]);
-		sd.setType(this.type);
+		sd.setType(String.valueOf(this.getArguments()[0]));
 		setEnabledO2ACommunication(true, 0);
 		System.out.println("Created TruckAgent " + getName() + " with type: "
 				+ sd.getType());
@@ -34,7 +36,7 @@ public class TruckAgent extends Agent {
 			e.printStackTrace();
 		}
 
-		// adiciona behaviour ciclico (ler inform lixo)
+		// adiciona behaviour ciclico (ler mensagens)
 		addBehaviour(new CyclicBehaviour(this) {
 			private static final long serialVersionUID = 1L;
 
@@ -42,11 +44,19 @@ public class TruckAgent extends Agent {
 			public void action() {
 				ACLMessage msg = receive();
 				if (msg != null) {
-					if (msg.getPerformative() == ACLMessage.INFORM) {
+					switch (msg.getPerformative()) {
+					case ACLMessage.INFORM:
 						System.out.println(myAgent.getName()
 								+ " got INFORM from "
 								+ msg.getSender().getName() + ": "
 								+ msg.getContent());
+						break;
+					case ACLMessage.CONFIRM:
+						event.notifyProcessed(true);
+						break;
+					case ACLMessage.REFUSE:
+						event.notifyProcessed(false);
+						break;
 					}
 				} else {
 					block();
@@ -54,7 +64,7 @@ public class TruckAgent extends Agent {
 			}
 		});
 
-		// adiciona behaviour ciclico (enviar mensagem)
+		// adiciona behaviour ciclico (enviar mensagens)
 		addBehaviour(new CyclicBehaviour(this) {
 			private static final long serialVersionUID = 1L;
 
@@ -66,26 +76,46 @@ public class TruckAgent extends Agent {
 				// if we actually got one
 				if (messageContent != null) {
 					String[] args = messageContent.split("\\s+");
-					String toSend = new String(args[1] + " " + args[2]);
+					int requestType = Integer.parseInt(args[0]);
+					String toSend = null;
 
 					// pesquisa DF por agentes do tipo de lixo respectivo
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd1 = new ServiceDescription();
-					String thisAgentType = ((TruckAgent) myAgent).type;
+					TruckAgent myTruckAgent = (TruckAgent) this.myAgent;
 
 					ACLMessage msg;
 
-					if (thisAgentType.equals(args[0])) // mesmo tipo, perguntar
-														// ao mundo
-					{
+					switch (requestType) {
+					case TruckAgent.CONTAINERCAPACITY:
+						myTruckAgent.event = (Event) myAgent.getO2AObject();
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
-					} else {
-						sd1.setType(args[0]); // agentes que recebem mensagem
+						// REQUEST_TYPE + X + Y
+						toSend = args[0] + " " + args[1] + " " + args[2];
+						break;
+					case TruckAgent.INFORMOTHERTRUCKS:
+						sd1.setType(args[1]); // agentes que recebem mensagem
 												// s�o
 												// do
 												// mesmo tipo que o lixo
 						msg = new ACLMessage(ACLMessage.INFORM);
+						// X + Y
+						toSend = args[2] + " " + args[3];
+						break;
+					case TruckAgent.MOVE:
+						myTruckAgent.event = (Event) myAgent.getO2AObject();
+						sd1.setType("World");
+						msg = new ACLMessage(ACLMessage.REQUEST);
+						// REQUEST_TYPE + TRUCK_NAME + X + Y
+						toSend = args[0] + " " + args[1] + " " + args[2] + " "
+								+ args[3];
+						break;
+					default:
+						System.out
+								.println("(TruckAgent) INVALID MESSAGE TYPE!");
+						return;
+
 					}
 					template.addServices(sd1);
 					try {
