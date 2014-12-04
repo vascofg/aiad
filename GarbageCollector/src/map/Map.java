@@ -36,7 +36,7 @@ public class Map {
 		this.roads = new ArrayList<Road>();
 	}
 
-	private static <T extends MapElement> T getElement(Class<T> clazz,
+	public static <T extends MapElement> T getElement(Class<T> clazz,
 			Point point, ArrayList<ArrayList<MapElement>> mapMatrix) {
 		try {
 			return clazz.cast(mapMatrix.get(point.y).get(point.x));
@@ -119,15 +119,18 @@ public class Map {
 	public void initTrucks(ContainerController containerController) {
 		System.out.println("Initializing trucks...");
 		try {
-			PlasticTruck plastic = new PlasticTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Plastico", this.mapMatrix);
-			trucks.add(plastic);
-			plastic.start();
 			
 			PaperTruck paper = new PaperTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Papel", this.mapMatrix);
 			trucks.add(paper);
 			paper.start();
+			
+			
+			PlasticTruck plastic = new PlasticTruck(initialLocation, Truck.defaultCapacity,
+					containerController, "Plastico", this.mapMatrix);
+			trucks.add(plastic);
+			plastic.start();
+			
 			
 			GlassTruck glass = new GlassTruck(initialLocation, Truck.defaultCapacity,
 					containerController, "Vidro", this.mapMatrix);
@@ -157,6 +160,14 @@ public class Map {
 		}
 		return returnMatrix;
 	}
+	
+	public static Truck getTruckByAgentName(String agentName, ArrayList<Truck> trucks) {
+		for(Truck truck : trucks)
+			if(truck.getAgentName().equals(agentName))
+				return truck;
+		return null;
+	}
+	
 	/*
 	 * public void initRoads(Graph graph) {
 	 * System.out.println("Initializing roads..."); for (Road road : roads) {

@@ -45,6 +45,10 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.agentController.start();
 	}
 
+	public String getAgentName() {
+		return agentName;
+	}
+
 	public abstract int getType();
 
 	public Point getLocation() {
@@ -62,17 +66,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.usedCapacity = 0;
 	}
 
-	public boolean moveTruck(Point destination) throws StaleProxyException,
-			InterruptedException {
-		Event event = moveRequest(destination);
-		boolean result = (boolean) event.waitUntilProcessed(); // TODO:
-																// acrescentar
-																// timeout?
-		if (result) {
-			this.currentLocation = destination;
-			return true;
-		}
-		return false;
+	public void moveTruck(Point destination) {
+		this.currentLocation = destination;
 	}
 
 	public boolean emptyAdjacentContainers(List<Container> adjacentContainers,
@@ -82,50 +77,68 @@ public abstract class Truck extends Thread implements DrawableElement {
 			for (int i = 0; i < adjacentContainers.size(); i++) {
 				Container c = adjacentContainers.get(i);
 				Point p = adjacentContainerPoints.get(i);
-
-				// pergunta usedCapacity
-				// if (c.getUsedCapacity() > 0) {
-				if (c.truckCompatible(this)) { // my type
-					containerRequest(p.x, p.y);
-					// esvazia
-					/*
-					 * try { this.addToTruck(c.getUsedCapacity());
-					 * c.emptyContainer(); emptiedAny = true; } catch
-					 * (TruckFullException e) { // TODO: inform trucks of same
-					 * // type //avisa outros do mm tipo break; }
-					 */
+				if (c.truckCompatible(this)) {
+					if (containerRequest(p.x, p.y))
+						emptiedAny = true;
 				} else
 					containerInform(c.getType(), p.x, p.y);
+
 			}
-		} catch (StaleProxyException e) {
+		} catch (StaleProxyException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// }
 		return emptiedAny;
 	}
 
 	public void containerInform(int garbageType, int X, int Y)
 			throws StaleProxyException {
-		this.agentController.putO2AObject(new String(
-				TruckAgent.INFORMOTHERTRUCKS + " " + garbageType + " " + X
-						+ " " + Y), false);
+		Event event = new Event(TruckAgent.INFORMOTHERTRUCKS, this);
+		event.addParameter(new String(TruckAgent.INFORMOTHERTRUCKS + " "
+				+ garbageType + " " + X + " " + Y));
+		this.agentController.putO2AObject(event, false);
 	}
 
-	public Event containerRequest(int X, int Y) throws StaleProxyException {
-		this.agentController.putO2AObject(new String(
-				TruckAgent.CONTAINERCAPACITY + " " + X + " " + Y), false);
-		Event event = new Event(TruckAgent.CONTAINERCAPACITY, this);
+	public void emptiedContainerInform(int X, int Y) throws StaleProxyException {
+		Event event = new Event(TruckAgent.INFORMEMPTIEDCONTAINER, this);
+		event.addParameter(new String(TruckAgent.INFORMEMPTIEDCONTAINER + " "
+				+ X + " " + Y));
 		this.agentController.putO2AObject(event, false);
-		return event;
 	}
 
-	public Event moveRequest(Point destination) throws StaleProxyException {
-		this.agentController.putO2AObject(new String(TruckAgent.MOVE + " "
-				+ this.agentName + " " + destination.x + " " + destination.y), false);
-		Event event = new Event(TruckAgent.MOVE, this);
+	public boolean containerRequest(int X, int Y) throws StaleProxyException,
+			InterruptedException {
+		Event event = new Event(TruckAgent.REQUESTCONTAINERCAPACITY, this);
+		event.addParameter(new String(TruckAgent.REQUESTCONTAINERCAPACITY + " "
+				+ X + " " + Y));
+		event.addParameter(new Point(X, Y));
 		this.agentController.putO2AObject(event, false);
-		return event;
+
+		int capacity = (int) event.waitUntilProcessed();
+		try {
+			this.addToTruck(capacity);
+			emptiedContainerInform(X, Y);
+			return true;
+		} catch (TruckFullException e) {
+			containerInform(this.getType(), X, Y);
+		}
+		return false;
+	}
+
+	public boolean moveRequest(Point destination) throws StaleProxyException,
+			InterruptedException {
+		Event event = new Event(TruckAgent.REQUESTMOVE, this);
+		event.addParameter(new String(TruckAgent.REQUESTMOVE + " "
+				+ this.agentName + " " + destination.x + " " + destination.y));
+		this.agentController.putO2AObject(event, false);
+
+		boolean result = (boolean) event.waitUntilProcessed(); // TODO:
+																// acrescentar
+																// timeout?
+		if (result)
+			moveTruck(destination);
+
+		return result;
 	}
 
 	// temporary
@@ -133,7 +146,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 		try {
 			List<Point> possibleMoves = Map.getAllAdjacentPoints(Road.class,
 					getLocation(), mapMatrix);
-			return moveTruck(possibleMoves.get(GarbageCollector.randGenerator
+			return moveRequest(possibleMoves.get(GarbageCollector.randGenerator
 					.nextInt(possibleMoves.size())));
 		} catch (StaleProxyException | InterruptedException e) {
 			e.printStackTrace();
@@ -145,7 +158,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	@Override
 	public synchronized void start() {
-		System.out.println("Starting truck thread...");
+		System.out.println("Starting " + agentName + " truck thread...");
 		super.start();
 	}
 
@@ -153,7 +166,12 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void run() {
 		while (go) {
 			try {
-				this.moveRandomDirection();
+				if (!this.moveRandomDirection())
+					System.out.println("Truck " + agentName + " couldn't move");
+				/*emptyAdjacentContainers(Map.getAllAdjacentElements(
+						Container.class, getLocation(), mapMatrix),
+						Map.getAllAdjacentPoints(Container.class,
+								getLocation(), mapMatrix));*/
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
 				System.out.println("Truck thread interrupted, exiting");

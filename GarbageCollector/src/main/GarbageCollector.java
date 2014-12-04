@@ -13,13 +13,11 @@ import assets.Assets;
 
 public class GarbageCollector {
 
-	private static Map map;
-	private static MapJFrame frame;
+	public static Map map;
+	public static MapJFrame frame;
 	private static ContainerThread containerThread;
 	private static ContainerController containerController;
 	public static Random randGenerator = new Random();
-
-	/* private agente mundo */
 
 	private static ContainerController startJADE() {
 		ContainerController c = jade.core.Runtime.instance()
@@ -46,10 +44,10 @@ public class GarbageCollector {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				frame = new MapJFrame("Garbage Collector", map);
-				map.initTrucks(containerController);
 				containerThread = new ContainerThread(map.containers,
 						frame.mapComponent);
 				containerThread.start();
+				map.initTrucks(containerController);
 			}
 		});
 	}

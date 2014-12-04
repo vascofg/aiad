@@ -9,14 +9,16 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.util.Event;
 
+import java.awt.Point;
+
 public class TruckAgent extends Agent {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	protected Event event;
-	public static final int CONTAINERCAPACITY = 1, MOVE = 2,
-			INFORMOTHERTRUCKS = 3;
+	public static final int REQUESTCONTAINERCAPACITY = 1, REQUESTMOVE = 2,
+			INFORMOTHERTRUCKS = 3, INFORMEMPTIEDCONTAINER = 4;
 
 	// método setup
 	protected void setup() {
@@ -44,19 +46,39 @@ public class TruckAgent extends Agent {
 			public void action() {
 				ACLMessage msg = receive();
 				if (msg != null) {
+					String[] args = msg.getContent().split("\\s+");
+					int informType = Integer.parseInt(args[0]);
 					switch (msg.getPerformative()) {
 					case ACLMessage.INFORM:
-						System.out.println(myAgent.getName()
-								+ " got INFORM from "
-								+ msg.getSender().getName() + ": "
-								+ msg.getContent());
+						switch (informType) {
+						case TruckAgent.INFORMOTHERTRUCKS:
+							break;
+						case WorldAgent.INFORMCONTAINERCAPACITY:
+							Point expectedContainer = (Point) event
+									.getParameter(1);
+							if (expectedContainer.x == Integer
+									.parseInt(args[1])
+									&& expectedContainer.y == Integer
+											.parseInt(args[2]))
+								event.notifyProcessed(Integer.parseInt(args[3]));
+							else
+								System.out
+										.println("(TruckAgent) GOT CAPACITY OF AN UNEXPECTED CONTAINER");
+							break;
+						}
 						break;
 					case ACLMessage.CONFIRM:
-						event.notifyProcessed(true);
+						if (informType == WorldAgent.CONFIRMREFUSEMOVE)
+							event.notifyProcessed(true);
 						break;
 					case ACLMessage.REFUSE:
-						event.notifyProcessed(false);
+						if (informType == WorldAgent.CONFIRMREFUSEMOVE)
+							event.notifyProcessed(false);
 						break;
+					default:
+						System.out
+								.println("(TruckAgent) GOT UNEXPECTED MESSAGE!");
+						return;
 					}
 				} else {
 					block();
@@ -70,8 +92,10 @@ public class TruckAgent extends Agent {
 
 			@Override
 			public void action() {
+				TruckAgent myTruckAgent = (TruckAgent) this.myAgent;
 				// get an object from the O2A mailbox
-				String messageContent = (String) myAgent.getO2AObject();
+				myTruckAgent.event = (Event) myAgent.getO2AObject();
+				String messageContent = (String) event.getParameter(0);
 
 				// if we actually got one
 				if (messageContent != null) {
@@ -82,13 +106,11 @@ public class TruckAgent extends Agent {
 					// pesquisa DF por agentes do tipo de lixo respectivo
 					DFAgentDescription template = new DFAgentDescription();
 					ServiceDescription sd1 = new ServiceDescription();
-					TruckAgent myTruckAgent = (TruckAgent) this.myAgent;
 
 					ACLMessage msg;
 
 					switch (requestType) {
-					case TruckAgent.CONTAINERCAPACITY:
-						myTruckAgent.event = (Event) myAgent.getO2AObject();
+					case TruckAgent.REQUESTCONTAINERCAPACITY:
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
 						// REQUEST_TYPE + X + Y
@@ -100,20 +122,25 @@ public class TruckAgent extends Agent {
 												// do
 												// mesmo tipo que o lixo
 						msg = new ACLMessage(ACLMessage.INFORM);
-						// X + Y
-						toSend = args[2] + " " + args[3];
+						// INFORM_TYPE + X + Y
+						toSend = args[0] + " " + args[2] + " " + args[3];
 						break;
-					case TruckAgent.MOVE:
-						myTruckAgent.event = (Event) myAgent.getO2AObject();
+					case TruckAgent.REQUESTMOVE:
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
 						// REQUEST_TYPE + TRUCK_NAME + X + Y
 						toSend = args[0] + " " + args[1] + " " + args[2] + " "
 								+ args[3];
 						break;
+					case TruckAgent.INFORMEMPTIEDCONTAINER:
+						sd1.setType("World");
+						msg = new ACLMessage(ACLMessage.INFORM);
+						// REQUEST_TYPE + X + Y
+						toSend = args[0] + " " + args[1] + " " + args[2];
+						break;
 					default:
 						System.out
-								.println("(TruckAgent) INVALID MESSAGE TYPE!");
+								.println("(TruckAgent) GOT UNEXPECTED MESSAGE TYPE!");
 						return;
 
 					}
@@ -122,7 +149,10 @@ public class TruckAgent extends Agent {
 						DFAgentDescription[] result = DFService.search(myAgent,
 								template);
 						for (int i = 0; i < result.length; ++i)
+						{
+							//TODO: nao mandar para proprio agente (caso do inform com truck cheio)
 							msg.addReceiver(result[i].getName());
+						}
 						msg.setContent(toSend);
 						send(msg);
 					} catch (FIPAException e) {
