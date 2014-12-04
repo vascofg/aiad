@@ -1,12 +1,14 @@
 package gui;
 
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 
 import map.Map;
 import assets.Assets;
+import elements.Road;
 import elements.trucks.Truck;
 
 public class TrucksJComponent extends JComponent {
@@ -31,6 +33,16 @@ public class TrucksJComponent extends JComponent {
 						Assets.imgDim.width, Assets.imgDim.height, null);
 			}
 		}
-		super.paintComponent(g);
+	}
+
+	public void repaintTruck(Point from, Truck truck) { //TODO: Should we use this?
+		Graphics g = this.getGraphics();
+		g.drawImage(Assets.asphalt, from.x * Assets.imgDim.width, from.y
+				* Assets.imgDim.height, Assets.imgDim.width,
+				Assets.imgDim.height, null);
+		g.drawImage(truck.getImg(),
+				truck.getLocation().x * Assets.imgDim.width,
+				truck.getLocation().y * Assets.imgDim.height,
+				Assets.imgDim.width, Assets.imgDim.height, null);
 	}
 }

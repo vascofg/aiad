@@ -35,6 +35,5 @@ public class MapJComponent extends JComponent {
 							Assets.imgDim.height, null);
 			}
 		}
-		super.paintComponent(g);
 	}
 }

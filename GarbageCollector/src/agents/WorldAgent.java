@@ -17,7 +17,8 @@ import elements.trucks.Truck;
 
 public class WorldAgent extends Agent {
 	private static final long serialVersionUID = 1L;
-	public static final int INFORM_CONTAINER_CAPACITY = 5, CONFIRM_REFUSE_MOVE = 6;
+	public static final int INFORM_CONTAINER_CAPACITY = 5,
+			CONFIRM_REFUSE_MOVE = 6;
 
 	// método setup
 	protected void setup() {
@@ -58,9 +59,10 @@ public class WorldAgent extends Agent {
 								GarbageCollector.map.mapMatrix);
 						sendMsg = new ACLMessage(ACLMessage.INFORM);
 						// REQUEST_TYPE + X + Y + CAPACITY
-						toSend = new String(WorldAgent.INFORM_CONTAINER_CAPACITY
-								+ " " + point.x + " " + point.y + " "
-								+ c.getUsedCapacity());
+						toSend = new String(
+								WorldAgent.INFORM_CONTAINER_CAPACITY + " "
+										+ point.x + " " + point.y + " "
+										+ c.getUsedCapacity());
 						break;
 					case TruckAgent.REQUEST_MOVE:
 						Truck truck = Map.getTruckByAgentName(args[1],
@@ -73,14 +75,17 @@ public class WorldAgent extends Agent {
 								canMove = false;
 						if (canMove) {
 							sendMsg = new ACLMessage(ACLMessage.CONFIRM);
+							Point from = truck.getLocation();
 							truck.moveTruck(point);
-							GarbageCollector.frame.trucksComponent.repaint();
+							GarbageCollector.frame.trucksComponent
+									.repaintTruck(from, truck);
 						} else {
 							sendMsg = new ACLMessage(ACLMessage.REFUSE);
 						}
 
 						// REQUEST_TYPE
-						toSend = Integer.toString(WorldAgent.CONFIRM_REFUSE_MOVE);
+						toSend = Integer
+								.toString(WorldAgent.CONFIRM_REFUSE_MOVE);
 						break;
 					case TruckAgent.INFORM_EMPTIED_CONTAINER:
 						point = new Point(Integer.parseInt(args[1]),
