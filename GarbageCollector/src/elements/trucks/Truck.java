@@ -1,5 +1,6 @@
 package elements.trucks;
 
+import jade.wrapper.AgentState;
 import jade.util.Event;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
@@ -142,10 +143,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 	}
 
 	// temporary
-	public boolean moveRandomDirection() {
+	public boolean moveRandomDirection(List<Point> possibleMoves) {
 		try {
-			List<Point> possibleMoves = Map.getAllAdjacentPoints(Road.class,
-					getLocation(), mapMatrix);
 			return moveRequest(possibleMoves.get(GarbageCollector.randGenerator
 					.nextInt(possibleMoves.size())));
 		} catch (StaleProxyException | InterruptedException e) {
@@ -166,15 +165,19 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void run() {
 		while (go) {
 			try {
-				if (!this.moveRandomDirection())
-					System.out.println("Truck " + agentName + " couldn't move");
-				/*emptyAdjacentContainers(Map.getAllAdjacentElements(
-						Container.class, getLocation(), mapMatrix),
-						Map.getAllAdjacentPoints(Container.class,
-								getLocation(), mapMatrix));*/
+				if (agentController.getState().getCode() == AgentState.cAGENT_STATE_IDLE) {
+					this.moveRandomDirection(Map.getAllAdjacentPoints(
+							Road.class, getLocation(), mapMatrix));
+					emptyAdjacentContainers(Map.getAllAdjacentElements(
+							Container.class, getLocation(), mapMatrix),
+							Map.getAllAdjacentPoints(Container.class,
+									getLocation(), mapMatrix));
+				}
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
 				System.out.println("Truck thread interrupted, exiting");
+			} catch (StaleProxyException e) {
+				e.printStackTrace();
 			}
 		}
 	}

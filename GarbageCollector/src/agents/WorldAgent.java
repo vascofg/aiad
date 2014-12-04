@@ -44,7 +44,6 @@ public class WorldAgent extends Agent {
 			public void action() {
 				ACLMessage msg = receive();
 				if (msg != null) {
-					System.out.println("WORLD GOT MESSAGE: " + msg.getContent());
 					String[] args = msg.getContent().split("\\s+");
 					int requestType = Integer.parseInt(args[0]);
 					Point point;
@@ -76,8 +75,9 @@ public class WorldAgent extends Agent {
 							sendMsg = new ACLMessage(ACLMessage.CONFIRM);
 							truck.moveTruck(point);
 							GarbageCollector.frame.trucksComponent.repaint();
-						} else
+						} else {
 							sendMsg = new ACLMessage(ACLMessage.REFUSE);
+						}
 
 						// REQUEST_TYPE
 						toSend = Integer.toString(WorldAgent.CONFIRMREFUSEMOVE);
@@ -89,6 +89,7 @@ public class WorldAgent extends Agent {
 								GarbageCollector.map.mapMatrix);
 						c.emptyContainer();
 						GarbageCollector.frame.mapComponent.repaint();
+						return; // no response to send
 					default:
 						System.out
 								.println("(WorldAgent) GOT UNEXPECTED MESSAGE TYPE!");

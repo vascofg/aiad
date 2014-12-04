@@ -48,36 +48,34 @@ public class TruckAgent extends Agent {
 				if (msg != null) {
 					String[] args = msg.getContent().split("\\s+");
 					int informType = Integer.parseInt(args[0]);
-					switch (msg.getPerformative()) {
-					case ACLMessage.INFORM:
-						switch (informType) {
-						case TruckAgent.INFORMOTHERTRUCKS:
-							break;
-						case WorldAgent.INFORMCONTAINERCAPACITY:
-							Point expectedContainer = (Point) event
-									.getParameter(1);
-							if (expectedContainer.x == Integer
-									.parseInt(args[1])
-									&& expectedContainer.y == Integer
-											.parseInt(args[2]))
-								event.notifyProcessed(Integer.parseInt(args[3]));
-							else
-								System.out
-										.println("(TruckAgent) GOT CAPACITY OF AN UNEXPECTED CONTAINER");
-							break;
-						}
+					switch (informType) {
+					case TruckAgent.INFORMOTHERTRUCKS:
+						System.out.println(myAgent.getName()
+								+ " got INFORM from "
+								+ msg.getSender().getName() + ": "
+								+ msg.getContent());
 						break;
-					case ACLMessage.CONFIRM:
-						if (informType == WorldAgent.CONFIRMREFUSEMOVE)
+					case WorldAgent.INFORMCONTAINERCAPACITY:
+						Point expectedContainer = (Point) event.getParameter(1);
+						if (expectedContainer.x == Integer.parseInt(args[1])
+								&& expectedContainer.y == Integer
+										.parseInt(args[2]))
+							event.notifyProcessed(Integer.parseInt(args[3]));
+						else
+							System.out
+									.println("(TruckAgent) GOT CAPACITY OF AN UNEXPECTED CONTAINER");
+						event = null;
+						break;
+					case WorldAgent.CONFIRMREFUSEMOVE:
+						if (msg.getPerformative() == ACLMessage.CONFIRM)
 							event.notifyProcessed(true);
-						break;
-					case ACLMessage.REFUSE:
-						if (informType == WorldAgent.CONFIRMREFUSEMOVE)
+						else if (msg.getPerformative() == ACLMessage.REFUSE)
 							event.notifyProcessed(false);
+						event = null;
 						break;
 					default:
 						System.out
-								.println("(TruckAgent) GOT UNEXPECTED MESSAGE!");
+								.println("(TruckAgent) GOT UNEXPECTED MESSAGE TYPE!");
 						return;
 					}
 				} else {
@@ -89,16 +87,16 @@ public class TruckAgent extends Agent {
 		// adiciona behaviour ciclico (enviar mensagens)
 		addBehaviour(new CyclicBehaviour(this) {
 			private static final long serialVersionUID = 1L;
+			TruckAgent myTruckAgent = (TruckAgent) this.myAgent;
 
 			@Override
 			public void action() {
-				TruckAgent myTruckAgent = (TruckAgent) this.myAgent;
 				// get an object from the O2A mailbox
-				myTruckAgent.event = (Event) myAgent.getO2AObject();
-				String messageContent = (String) event.getParameter(0);
+				Event event = (Event) myAgent.getO2AObject();
 
 				// if we actually got one
-				if (messageContent != null) {
+				if (event != null) {
+					String messageContent = (String) event.getParameter(0);
 					String[] args = messageContent.split("\\s+");
 					int requestType = Integer.parseInt(args[0]);
 					String toSend = null;
@@ -111,6 +109,7 @@ public class TruckAgent extends Agent {
 
 					switch (requestType) {
 					case TruckAgent.REQUESTCONTAINERCAPACITY:
+						myTruckAgent.event = event;
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
 						// REQUEST_TYPE + X + Y
@@ -126,6 +125,7 @@ public class TruckAgent extends Agent {
 						toSend = args[0] + " " + args[2] + " " + args[3];
 						break;
 					case TruckAgent.REQUESTMOVE:
+						myTruckAgent.event = event;
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
 						// REQUEST_TYPE + TRUCK_NAME + X + Y
@@ -148,9 +148,9 @@ public class TruckAgent extends Agent {
 					try {
 						DFAgentDescription[] result = DFService.search(myAgent,
 								template);
-						for (int i = 0; i < result.length; ++i)
-						{
-							//TODO: nao mandar para proprio agente (caso do inform com truck cheio)
+						for (int i = 0; i < result.length; ++i) {
+							// TODO: nao mandar para proprio agente (caso do
+							// inform com truck cheio)
 							msg.addReceiver(result[i].getName());
 						}
 						msg.setContent(toSend);
