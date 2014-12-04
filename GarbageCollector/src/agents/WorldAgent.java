@@ -17,7 +17,7 @@ import elements.trucks.Truck;
 
 public class WorldAgent extends Agent {
 	private static final long serialVersionUID = 1L;
-	public static final int INFORMCONTAINERCAPACITY = 5, CONFIRMREFUSEMOVE = 6;
+	public static final int INFORM_CONTAINER_CAPACITY = 5, CONFIRM_REFUSE_MOVE = 6;
 
 	// método setup
 	protected void setup() {
@@ -51,18 +51,18 @@ public class WorldAgent extends Agent {
 					ACLMessage sendMsg = null;
 					String toSend = null;
 					switch (requestType) {
-					case TruckAgent.REQUESTCONTAINERCAPACITY:
+					case TruckAgent.REQUEST_CONTAINER_CAPACITY:
 						point = new Point(Integer.parseInt(args[1]),
 								Integer.parseInt(args[2]));
 						c = Map.getElement(Container.class, point,
 								GarbageCollector.map.mapMatrix);
 						sendMsg = new ACLMessage(ACLMessage.INFORM);
 						// REQUEST_TYPE + X + Y + CAPACITY
-						toSend = new String(WorldAgent.INFORMCONTAINERCAPACITY
+						toSend = new String(WorldAgent.INFORM_CONTAINER_CAPACITY
 								+ " " + point.x + " " + point.y + " "
 								+ c.getUsedCapacity());
 						break;
-					case TruckAgent.REQUESTMOVE:
+					case TruckAgent.REQUEST_MOVE:
 						Truck truck = Map.getTruckByAgentName(args[1],
 								GarbageCollector.map.trucks);
 						point = new Point(Integer.parseInt(args[2]),
@@ -80,9 +80,9 @@ public class WorldAgent extends Agent {
 						}
 
 						// REQUEST_TYPE
-						toSend = Integer.toString(WorldAgent.CONFIRMREFUSEMOVE);
+						toSend = Integer.toString(WorldAgent.CONFIRM_REFUSE_MOVE);
 						break;
-					case TruckAgent.INFORMEMPTIEDCONTAINER:
+					case TruckAgent.INFORM_EMPTIED_CONTAINER:
 						point = new Point(Integer.parseInt(args[1]),
 								Integer.parseInt(args[2]));
 						c = Map.getElement(Container.class, point,

@@ -94,42 +94,44 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	public void containerInform(int garbageType, int X, int Y)
 			throws StaleProxyException {
-		Event event = new Event(TruckAgent.INFORMOTHERTRUCKS, this);
-		event.addParameter(new String(TruckAgent.INFORMOTHERTRUCKS + " "
+		Event event = new Event(TruckAgent.INFORM_OTHER_TRUCKS, this);
+		event.addParameter(new String(TruckAgent.INFORM_OTHER_TRUCKS + " "
 				+ garbageType + " " + X + " " + Y));
 		this.agentController.putO2AObject(event, false);
 	}
 
 	public void emptiedContainerInform(int X, int Y) throws StaleProxyException {
-		Event event = new Event(TruckAgent.INFORMEMPTIEDCONTAINER, this);
-		event.addParameter(new String(TruckAgent.INFORMEMPTIEDCONTAINER + " "
+		Event event = new Event(TruckAgent.INFORM_EMPTIED_CONTAINER, this);
+		event.addParameter(new String(TruckAgent.INFORM_EMPTIED_CONTAINER + " "
 				+ X + " " + Y));
 		this.agentController.putO2AObject(event, false);
 	}
 
 	public boolean containerRequest(int X, int Y) throws StaleProxyException,
 			InterruptedException {
-		Event event = new Event(TruckAgent.REQUESTCONTAINERCAPACITY, this);
-		event.addParameter(new String(TruckAgent.REQUESTCONTAINERCAPACITY + " "
+		Event event = new Event(TruckAgent.REQUEST_CONTAINER_CAPACITY, this);
+		event.addParameter(new String(TruckAgent.REQUEST_CONTAINER_CAPACITY + " "
 				+ X + " " + Y));
 		event.addParameter(new Point(X, Y));
 		this.agentController.putO2AObject(event, false);
 
-		int capacity = (int) event.waitUntilProcessed();
-		try {
-			this.addToTruck(capacity);
-			emptiedContainerInform(X, Y);
-			return true;
-		} catch (TruckFullException e) {
-			containerInform(this.getType(), X, Y);
+		int usedCapacity = (int) event.waitUntilProcessed();
+		if (usedCapacity > 0) {
+			try {
+				this.addToTruck(usedCapacity);
+				emptiedContainerInform(X, Y);
+				return true;
+			} catch (TruckFullException e) {
+				containerInform(this.getType(), X, Y);
+			}
 		}
 		return false;
 	}
 
 	public boolean moveRequest(Point destination) throws StaleProxyException,
 			InterruptedException {
-		Event event = new Event(TruckAgent.REQUESTMOVE, this);
-		event.addParameter(new String(TruckAgent.REQUESTMOVE + " "
+		Event event = new Event(TruckAgent.REQUEST_MOVE, this);
+		event.addParameter(new String(TruckAgent.REQUEST_MOVE + " "
 				+ this.agentName + " " + destination.x + " " + destination.y));
 		this.agentController.putO2AObject(event, false);
 

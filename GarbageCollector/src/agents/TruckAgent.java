@@ -17,8 +17,8 @@ public class TruckAgent extends Agent {
 	 */
 	private static final long serialVersionUID = 1L;
 	protected Event event;
-	public static final int REQUESTCONTAINERCAPACITY = 1, REQUESTMOVE = 2,
-			INFORMOTHERTRUCKS = 3, INFORMEMPTIEDCONTAINER = 4;
+	public static final int REQUEST_CONTAINER_CAPACITY = 1, REQUEST_MOVE = 2,
+			INFORM_OTHER_TRUCKS = 3, INFORM_EMPTIED_CONTAINER = 4;
 
 	// método setup
 	protected void setup() {
@@ -49,13 +49,15 @@ public class TruckAgent extends Agent {
 					String[] args = msg.getContent().split("\\s+");
 					int informType = Integer.parseInt(args[0]);
 					switch (informType) {
-					case TruckAgent.INFORMOTHERTRUCKS:
-						System.out.println(myAgent.getName()
-								+ " got INFORM from "
-								+ msg.getSender().getName() + ": "
-								+ msg.getContent());
+					case TruckAgent.INFORM_OTHER_TRUCKS:
+						//disregard messages from self
+						if(!msg.getSender().equals(myAgent.getAID()))
+							System.out.println(myAgent.getName()
+									+ " got INFORM from "
+									+ msg.getSender().getName() + ": "
+									+ msg.getContent());
 						break;
-					case WorldAgent.INFORMCONTAINERCAPACITY:
+					case WorldAgent.INFORM_CONTAINER_CAPACITY:
 						Point expectedContainer = (Point) event.getParameter(1);
 						if (expectedContainer.x == Integer.parseInt(args[1])
 								&& expectedContainer.y == Integer
@@ -66,7 +68,7 @@ public class TruckAgent extends Agent {
 									.println("(TruckAgent) GOT CAPACITY OF AN UNEXPECTED CONTAINER");
 						event = null;
 						break;
-					case WorldAgent.CONFIRMREFUSEMOVE:
+					case WorldAgent.CONFIRM_REFUSE_MOVE:
 						if (msg.getPerformative() == ACLMessage.CONFIRM)
 							event.notifyProcessed(true);
 						else if (msg.getPerformative() == ACLMessage.REFUSE)
@@ -108,14 +110,14 @@ public class TruckAgent extends Agent {
 					ACLMessage msg;
 
 					switch (requestType) {
-					case TruckAgent.REQUESTCONTAINERCAPACITY:
+					case TruckAgent.REQUEST_CONTAINER_CAPACITY:
 						myTruckAgent.event = event;
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
 						// REQUEST_TYPE + X + Y
 						toSend = args[0] + " " + args[1] + " " + args[2];
 						break;
-					case TruckAgent.INFORMOTHERTRUCKS:
+					case TruckAgent.INFORM_OTHER_TRUCKS:
 						sd1.setType(args[1]); // agentes que recebem mensagem
 												// s�o
 												// do
@@ -124,7 +126,7 @@ public class TruckAgent extends Agent {
 						// INFORM_TYPE + X + Y
 						toSend = args[0] + " " + args[2] + " " + args[3];
 						break;
-					case TruckAgent.REQUESTMOVE:
+					case TruckAgent.REQUEST_MOVE:
 						myTruckAgent.event = event;
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.REQUEST);
@@ -132,7 +134,7 @@ public class TruckAgent extends Agent {
 						toSend = args[0] + " " + args[1] + " " + args[2] + " "
 								+ args[3];
 						break;
-					case TruckAgent.INFORMEMPTIEDCONTAINER:
+					case TruckAgent.INFORM_EMPTIED_CONTAINER:
 						sd1.setType("World");
 						msg = new ACLMessage(ACLMessage.INFORM);
 						// REQUEST_TYPE + X + Y
