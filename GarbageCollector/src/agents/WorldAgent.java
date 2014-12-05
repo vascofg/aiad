@@ -85,7 +85,8 @@ public class WorldAgent extends Agent {
 							Road roadTo = Map.getElement(Road.class, to,
 									map.mapMatrix);
 							roadTo.setTruck(truck);
-							//TODO: evitar que apague no inicio (vários na mesma road)
+							// TODO: evitar que apague no inicio (vários na
+							// mesma road)
 							roadFrom.removeTruck();
 							GarbageCollector.frame.mapComponent.repaintTruck(
 									from, to);
