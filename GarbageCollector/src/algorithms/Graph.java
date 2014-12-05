@@ -33,8 +33,8 @@ public class Graph {
 						currentVertex, adjacentVertex, 1));
 			}
 		}
-		System.out.println("Processed " + this.vertexes.size() + " vertexes and "
-				+ this.edges.size() + " edges");
+		System.out.println("Processed " + this.vertexes.size()
+				+ " vertexes and " + this.edges.size() + " edges");
 	}
 
 	public List<Vertex> getVertexes() {

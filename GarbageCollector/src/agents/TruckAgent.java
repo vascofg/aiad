@@ -50,8 +50,8 @@ public class TruckAgent extends Agent {
 					int informType = Integer.parseInt(args[0]);
 					switch (informType) {
 					case TruckAgent.INFORM_OTHER_TRUCKS:
-						//disregard messages from self
-						if(!msg.getSender().equals(myAgent.getAID()))
+						// disregard messages from self
+						if (!msg.getSender().equals(myAgent.getAID()))
 							System.out.println(myAgent.getName()
 									+ " got INFORM from "
 									+ msg.getSender().getName() + ": "

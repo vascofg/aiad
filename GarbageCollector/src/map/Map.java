@@ -29,7 +29,9 @@ public class Map {
 	public Graph graph;
 	public AgentController worldAgent;
 
-	public Map() {
+	public static final Map INSTANCE = new Map();
+
+	private Map() {
 		this.mapMatrix = new ArrayList<ArrayList<MapElement>>();
 		this.trucks = new ArrayList<Truck>();
 		this.containers = new ArrayList<Container>();
@@ -118,28 +120,33 @@ public class Map {
 
 	public void initTrucks(ContainerController containerController) {
 		System.out.println("Initializing trucks...");
+		Road initialRoad = Map.getElement(Road.class, initialLocation,
+				mapMatrix);
 		try {
-			
-			PaperTruck paper = new PaperTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Papel", this.mapMatrix);
+
+			PaperTruck paper = new PaperTruck(initialLocation,
+					Truck.defaultCapacity, containerController, "Papel",
+					this.mapMatrix);
 			trucks.add(paper);
+			// put one of the trucks on the initial road to draw
+			initialRoad.setTruck(paper);
 			paper.start();
-			
-			
-			PlasticTruck plastic = new PlasticTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Plastico", this.mapMatrix);
+
+			PlasticTruck plastic = new PlasticTruck(initialLocation,
+					Truck.defaultCapacity, containerController, "Plastico",
+					this.mapMatrix);
 			trucks.add(plastic);
 			plastic.start();
-			
-			
-			GlassTruck glass = new GlassTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Vidro", this.mapMatrix);
+
+			GlassTruck glass = new GlassTruck(initialLocation,
+					Truck.defaultCapacity, containerController, "Vidro",
+					this.mapMatrix);
 			trucks.add(glass);
 			glass.start();
-			
-			
-			GarbageTruck garbage = new GarbageTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Lixo", this.mapMatrix);
+
+			GarbageTruck garbage = new GarbageTruck(initialLocation,
+					Truck.defaultCapacity, containerController, "Lixo",
+					this.mapMatrix);
 			trucks.add(garbage);
 			garbage.start();
 		} catch (StaleProxyException e) {
@@ -160,14 +167,15 @@ public class Map {
 		}
 		return returnMatrix;
 	}
-	
-	public static Truck getTruckByAgentName(String agentName, ArrayList<Truck> trucks) {
-		for(Truck truck : trucks)
-			if(truck.getAgentName().equals(agentName))
+
+	public static Truck getTruckByAgentName(String agentName,
+			ArrayList<Truck> trucks) {
+		for (Truck truck : trucks)
+			if (truck.getAgentName().equals(agentName))
 				return truck;
 		return null;
 	}
-	
+
 	/*
 	 * public void initRoads(Graph graph) {
 	 * System.out.println("Initializing roads..."); for (Road road : roads) {

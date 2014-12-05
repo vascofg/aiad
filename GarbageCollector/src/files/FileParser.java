@@ -23,9 +23,10 @@ import elements.containers.PaperContainer;
 import elements.containers.PlasticContainer;
 
 public class FileParser {
-	public static Map parseFile(String name, ContainerController containerController) {
+	public static void parseFile(String name,
+			ContainerController containerController) {
 		System.out.println("Parsing map file...");
-		Map map = new Map();
+		Map map = Map.INSTANCE;
 		BufferedReader in;
 		try {
 			in = new BufferedReader(new FileReader(name));
@@ -101,9 +102,9 @@ public class FileParser {
 			in.close();
 			System.out.println("Parsed " + count + " elements");
 			map.graph = new Graph(map);
-			map.worldAgent = containerController.createNewAgent("World", "agents.WorldAgent", new Object[0]);
+			map.worldAgent = containerController.createNewAgent("World",
+					"agents.WorldAgent", new Object[0]);
 			map.worldAgent.start();
-			return map;
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found!");
 		} catch (IOException e) {
@@ -113,6 +114,5 @@ public class FileParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
 	}
 }

@@ -1,8 +1,8 @@
 package elements.trucks;
 
-import jade.wrapper.AgentState;
 import jade.util.Event;
 import jade.wrapper.AgentController;
+import jade.wrapper.AgentState;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
@@ -110,8 +110,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public boolean containerRequest(int X, int Y) throws StaleProxyException,
 			InterruptedException {
 		Event event = new Event(TruckAgent.REQUEST_CONTAINER_CAPACITY, this);
-		event.addParameter(new String(TruckAgent.REQUEST_CONTAINER_CAPACITY + " "
-				+ X + " " + Y));
+		event.addParameter(new String(TruckAgent.REQUEST_CONTAINER_CAPACITY
+				+ " " + X + " " + Y));
 		event.addParameter(new Point(X, Y));
 		this.agentController.putO2AObject(event, false);
 

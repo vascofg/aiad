@@ -2,8 +2,7 @@ package main;
 
 import java.util.ArrayList;
 
-import javax.swing.JComponent;
-
+import map.Map;
 import elements.containers.Container;
 import exceptions.ContainerFullException;
 
@@ -11,11 +10,9 @@ public class ContainerThread extends Thread {
 	private boolean go = true;
 	private static final int tickTime = 10000; // in ms
 	private ArrayList<Container> containers;
-	private JComponent component;
 
-	public ContainerThread(ArrayList<Container> containers, JComponent component) {
-		this.containers = containers;
-		this.component = component;
+	public ContainerThread() {
+		this.containers = Map.INSTANCE.containers;
 	}
 
 	@Override
@@ -29,9 +26,12 @@ public class ContainerThread extends Thread {
 		while (go) {
 			try {
 				for (Container c : containers) {
-					addRandomToContainer(c);
+					int added = addRandomToContainer(c);
+					if (c.getUsedCapacity() - added == 0) // was empty
+						GarbageCollector.frame.mapComponent.repaintElement(c,
+								Map.findElement(Container.class, c,
+										Map.INSTANCE.mapMatrix));
 				}
-				component.repaint();
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
 				System.out.println("Container thread interrupted, exiting");
@@ -39,12 +39,15 @@ public class ContainerThread extends Thread {
 		}
 	}
 
-	private void addRandomToContainer(Container c) {
+	private int addRandomToContainer(Container c) {
 		try {
-			c.addToContainer(GarbageCollector.randGenerator.nextInt(2));
+			int toAdd = GarbageCollector.randGenerator.nextInt(2);
+			c.addToContainer(toAdd);
+			return toAdd;
 		} catch (ContainerFullException e) {
 			// do nothing
 		}
+		return 0;
 	}
 
 	@Override

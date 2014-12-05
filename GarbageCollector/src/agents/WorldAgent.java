@@ -12,6 +12,7 @@ import java.awt.Point;
 
 import main.GarbageCollector;
 import map.Map;
+import elements.Road;
 import elements.containers.Container;
 import elements.trucks.Truck;
 
@@ -47,6 +48,7 @@ public class WorldAgent extends Agent {
 				if (msg != null) {
 					String[] args = msg.getContent().split("\\s+");
 					int requestType = Integer.parseInt(args[0]);
+					Map map = Map.INSTANCE;
 					Point point;
 					Container c;
 					ACLMessage sendMsg = null;
@@ -56,7 +58,7 @@ public class WorldAgent extends Agent {
 						point = new Point(Integer.parseInt(args[1]),
 								Integer.parseInt(args[2]));
 						c = Map.getElement(Container.class, point,
-								GarbageCollector.map.mapMatrix);
+								map.mapMatrix);
 						sendMsg = new ACLMessage(ACLMessage.INFORM);
 						// REQUEST_TYPE + X + Y + CAPACITY
 						toSend = new String(
@@ -66,19 +68,27 @@ public class WorldAgent extends Agent {
 						break;
 					case TruckAgent.REQUEST_MOVE:
 						Truck truck = Map.getTruckByAgentName(args[1],
-								GarbageCollector.map.trucks);
+								map.trucks);
 						point = new Point(Integer.parseInt(args[2]),
 								Integer.parseInt(args[3]));
 						boolean canMove = true;
-						for (Truck t : GarbageCollector.map.trucks)
+						for (Truck t : map.trucks)
 							if (t.getLocation().equals(point))
 								canMove = false;
 						if (canMove) {
 							sendMsg = new ACLMessage(ACLMessage.CONFIRM);
 							Point from = truck.getLocation();
 							truck.moveTruck(point);
-							GarbageCollector.frame.trucksComponent
-									.repaintTruck(from, truck);
+							Point to = truck.getLocation();
+							Road roadFrom = Map.getElement(Road.class, from,
+									map.mapMatrix);
+							Road roadTo = Map.getElement(Road.class, to,
+									map.mapMatrix);
+							roadTo.setTruck(truck);
+							//TODO: evitar que apague no inicio (vários na mesma road)
+							roadFrom.removeTruck();
+							GarbageCollector.frame.mapComponent.repaintTruck(
+									from, to);
 						} else {
 							sendMsg = new ACLMessage(ACLMessage.REFUSE);
 						}
@@ -91,9 +101,10 @@ public class WorldAgent extends Agent {
 						point = new Point(Integer.parseInt(args[1]),
 								Integer.parseInt(args[2]));
 						c = Map.getElement(Container.class, point,
-								GarbageCollector.map.mapMatrix);
+								map.mapMatrix);
 						c.emptyContainer();
-						GarbageCollector.frame.mapComponent.repaint();
+						GarbageCollector.frame.mapComponent.repaintElement(c,
+								point);
 						return; // no response to send
 					default:
 						System.out
