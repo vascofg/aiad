@@ -96,20 +96,12 @@ public class Map {
 		T rightElement = getElement(clazz, rightPoint, mapMatrix);
 		if (topElement != null)
 			list.add(topPoint);
-		else
-			list.add(null);
 		if (bottomElement != null)
 			list.add(bottomPoint);
-		else
-			list.add(null);
 		if (leftElement != null)
 			list.add(leftPoint);
-		else
-			list.add(null);
 		if (rightElement != null)
 			list.add(rightPoint);
-		else
-			list.add(null);
 		return list;
 	}
 
@@ -121,8 +113,6 @@ public class Map {
 		for (Point point : points) {
 			if (point != null)
 				elements.add(Map.<T> getElement(clazz, point, mapMatrix));
-			else
-				elements.add(null);
 		}
 		return elements;
 	}

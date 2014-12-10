@@ -44,7 +44,7 @@ public class GarbageCollector {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				frame = new MapJFrame("Garbage Collector");
-				// jgraphFrame = new JGraphFrame(Map.INSTANCE.graph.graph);
+				//jgraphFrame = new JGraphFrame(Map.INSTANCE.graph);
 				containerThread = new ContainerThread();
 				containerThread.start();
 				Map.INSTANCE.initTrucks(containerController);

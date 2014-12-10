@@ -17,10 +17,11 @@ public class TruckAgent extends Agent {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected Event event;
+	protected Event event, gotInformEvent;
 	private AID worldAgent;
 	public static final int REQUEST_CONTAINER_CAPACITY = 1, REQUEST_MOVE = 2,
-			INFORM_OTHER_TRUCKS = 3, INFORM_EMPTIED_CONTAINER = 4;
+			INFORM_OTHER_TRUCKS = 3, INFORM_EMPTIED_CONTAINER = 4,
+			GOT_INFORM_EVENT = 7;
 
 	// método setup
 	protected void setup() {
@@ -51,6 +52,7 @@ public class TruckAgent extends Agent {
 		// adiciona behaviour ciclico (ler mensagens)
 		addBehaviour(new CyclicBehaviour(this) {
 			private static final long serialVersionUID = 1L;
+			TruckAgent myTruckAgent = (TruckAgent) this.myAgent;
 
 			@Override
 			public void action() {
@@ -64,6 +66,9 @@ public class TruckAgent extends Agent {
 								+ " got INFORM from "
 								+ msg.getSender().getName() + ": "
 								+ msg.getContent());
+						myTruckAgent.gotInformEvent.notifyProcessed(new Point(
+								Integer.parseInt(args[1]), Integer
+										.parseInt(args[2])));
 						break;
 					case WorldAgent.INFORM_CONTAINER_CAPACITY:
 						Point expectedContainer = (Point) event.getParameter(1);
@@ -106,66 +111,80 @@ public class TruckAgent extends Agent {
 
 				// if we actually got one
 				if (event != null) {
-					String messageContent = (String) event.getParameter(0);
-					String[] args = messageContent.split("\\s+");
-					int requestType = Integer.parseInt(args[0]);
-					String toSend = null;
+					try {
+						String messageContent = (String) event.getParameter(0);
+						String[] args = messageContent.split("\\s+");
+						String toSend = null;
 
-					ACLMessage msg;
+						ACLMessage msg = null;
 
-					switch (requestType) {
-					case TruckAgent.REQUEST_CONTAINER_CAPACITY:
-						myTruckAgent.event = event;
-						msg = new ACLMessage(ACLMessage.REQUEST);
-						msg.addReceiver(worldAgent);
-						// REQUEST_TYPE + X + Y
-						toSend = args[0] + " " + args[1] + " " + args[2];
-						break;
-					case TruckAgent.INFORM_OTHER_TRUCKS:
-						// pesquisa DF por agentes do tipo de lixo respectivo
-						try {
-							msg = new ACLMessage(ACLMessage.INFORM);
-							DFAgentDescription template = new DFAgentDescription();
-							ServiceDescription sd1 = new ServiceDescription();
-							sd1.setType(args[1]);
-							template.addServices(sd1);
-							DFAgentDescription[] result = DFService.search(
-									myAgent, template);
-							for (int i = 0; i < result.length; ++i) {
-								// dont send messages to self
-								if (!myAgent.getAID().equals(
-										result[i].getName()))
-									msg.addReceiver(result[i].getName());
-							}
-							// INFORM_TYPE + X + Y
-							toSend = args[0] + " " + args[2] + " " + args[3];
+						switch (event.getType()) {
+						case TruckAgent.REQUEST_CONTAINER_CAPACITY:
+							myTruckAgent.event = event;
+							msg = new ACLMessage(ACLMessage.REQUEST);
+							msg.addReceiver(worldAgent);
+							// REQUEST_TYPE + X + Y
+							toSend = event.getType() + " " + args[0] + " " + args[1];
 							break;
-						} catch (FIPAException e) {
-							e.printStackTrace();
+						case TruckAgent.INFORM_OTHER_TRUCKS:
+							// pesquisa DF por agentes do tipo de lixo
+							// respectivo
+							try {
+								msg = new ACLMessage(ACLMessage.INFORM);
+								DFAgentDescription template = new DFAgentDescription();
+								ServiceDescription sd1 = new ServiceDescription();
+								sd1.setType(args[0]);
+								template.addServices(sd1);
+								DFAgentDescription[] result = DFService.search(
+										myAgent, template);
+								for (int i = 0; i < result.length; ++i) {
+									// dont send messages to self
+									if (!myAgent.getAID().equals(
+											result[i].getName()))
+										msg.addReceiver(result[i].getName());
+								}
+								// INFORM_TYPE + X + Y
+								toSend = event.getType() + " " + args[1] + " "
+										+ args[2];
+								break;
+							} catch (FIPAException e) {
+								e.printStackTrace();
+								return;
+							}
+						case TruckAgent.REQUEST_MOVE:
+							myTruckAgent.event = event;
+							msg = new ACLMessage(ACLMessage.REQUEST);
+							msg.addReceiver(worldAgent);
+							// REQUEST_TYPE + TRUCK_NAME + X + Y
+							toSend = event.getType() + " " + args[0] + " " + args[1]
+									+ " " + args[2];
+							break;
+						case TruckAgent.INFORM_EMPTIED_CONTAINER:
+							msg = new ACLMessage(ACLMessage.INFORM);
+							msg.addReceiver(worldAgent);
+							// REQUEST_TYPE + X + Y
+							toSend = event.getType() + " " + args[0] + " " + args[1];
+							break;
+						default:
+							System.out
+									.println("(TruckAgent) GOT UNEXPECTED MESSAGE TYPE!");
 							return;
-						}
-					case TruckAgent.REQUEST_MOVE:
-						myTruckAgent.event = event;
-						msg = new ACLMessage(ACLMessage.REQUEST);
-						msg.addReceiver(worldAgent);
-						// REQUEST_TYPE + TRUCK_NAME + X + Y
-						toSend = args[0] + " " + args[1] + " " + args[2] + " "
-								+ args[3];
-						break;
-					case TruckAgent.INFORM_EMPTIED_CONTAINER:
-						msg = new ACLMessage(ACLMessage.INFORM);
-						msg.addReceiver(worldAgent);
-						// REQUEST_TYPE + X + Y
-						toSend = args[0] + " " + args[1] + " " + args[2];
-						break;
-					default:
-						System.out
-								.println("(TruckAgent) GOT UNEXPECTED MESSAGE TYPE!");
-						return;
 
+						}
+						msg.setContent(toSend);
+						send(msg);
+					} catch (IndexOutOfBoundsException e) {
+						if (event.getType() == TruckAgent.GOT_INFORM_EVENT) { // regista
+							// evento
+							// (espera
+							// por
+							// informs)
+							myTruckAgent.gotInformEvent = event;
+							return;
+						} else {
+							e.printStackTrace();
+						}
 					}
-					msg.setContent(toSend);
-					send(msg);
 				} else {
 					block();
 				}

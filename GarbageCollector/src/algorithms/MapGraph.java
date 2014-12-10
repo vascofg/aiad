@@ -25,10 +25,8 @@ public class MapGraph extends DefaultDirectedGraph<Point, DefaultEdge> {
 			List<Point> adjacentRoads = Map.getAllAdjacentPoints(Road.class,
 					road, map.mapMatrix);
 			for (Point adjacent : adjacentRoads) {
-				if (adjacent != null) {
-					this.addEdge(road, adjacent);
-					countEdge++;
-				}
+				this.addEdge(road, adjacent);
+				countEdge++;
 			}
 		}
 		System.out.println("Processed " + countVertex + " vertexes and "

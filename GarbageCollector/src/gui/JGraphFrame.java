@@ -2,19 +2,19 @@ package gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.util.Map;
 
 import javax.swing.JFrame;
 
 import org.jgraph.JGraph;
-import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 
+import algorithms.MapGraph;
+
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.organic.JGraphFastOrganicLayout;
-
-import elements.Road;
 
 public class JGraphFrame extends JFrame {
 	/**
@@ -22,13 +22,13 @@ public class JGraphFrame extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static final Color DEFAULT_BG_COLOR = Color.decode("#FAFBFF");
-	private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
+	// private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
 	//
-	private JGraphModelAdapter<Road, DefaultEdge> m_jgAdapter;
+	private JGraphModelAdapter<Point, DefaultEdge> m_jgAdapter;
 
-	public JGraphFrame(Graph<Road, DefaultEdge> graph) {
+	public JGraphFrame(MapGraph graph) {
 		super();
-		m_jgAdapter = new JGraphModelAdapter<Road, DefaultEdge>(graph);
+		m_jgAdapter = new JGraphModelAdapter<Point, DefaultEdge>(graph);
 		JGraph jgraph = new JGraph(m_jgAdapter);
 		JGraphFacade jgf = new JGraphFacade(jgraph);
 		JGraphFastOrganicLayout layoutifier = new JGraphFastOrganicLayout();
@@ -40,14 +40,15 @@ public class JGraphFrame extends JFrame {
 
 		jgraph.getGraphLayoutCache().update();
 		jgraph.refresh();
+		this.setExtendedState(this.getExtendedState()
+				| JFrame.MAXIMIZED_BOTH);
 		adjustDisplaySettings(jgraph);
 		this.getContentPane().add(jgraph);
-		this.setSize(DEFAULT_SIZE);
 		this.setVisible(true);
 	}
 
 	private void adjustDisplaySettings(JGraph jg) {
-		jg.setPreferredSize(DEFAULT_SIZE);
+		jg.setPreferredSize(this.getSize());
 
 		Color c = DEFAULT_BG_COLOR;
 		/*
