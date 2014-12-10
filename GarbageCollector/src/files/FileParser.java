@@ -29,10 +29,10 @@ import elements.trucks.PlasticTruck;
 import elements.trucks.Truck;
 
 public class FileParser {
-	public static Map parseMapFile(String fileName,
+	public static void parseMapFile(String fileName,
 			ContainerController containerController) {
 		System.out.println("Parsing map file...");
-		Map map = new Map();
+		Map map = Map.INSTANCE;
 		BufferedReader in;
 		try {
 			in = new BufferedReader(new FileReader(fileName));
@@ -111,7 +111,6 @@ public class FileParser {
 			map.worldAgent = containerController.createNewAgent("World",
 					"agents.WorldAgent", new Object[0]);
 			map.worldAgent.start();
-			return map;
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found!");
 		} catch (IOException e) {
@@ -121,7 +120,6 @@ public class FileParser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
 	}
 
 	public static List<Truck> parseTrucksFile(String fileName,
@@ -165,34 +163,38 @@ public class FileParser {
 						char type = line.charAt(i + 1);
 						switch (type) {
 						case 'V':
-							currentTruck = new GlassTruck(initialLocation, capacity,
-									containerController, truckName, mapMatrix);
+							currentTruck = new GlassTruck(initialLocation,
+									capacity, containerController, truckName,
+									mapMatrix);
 							trucks.add(currentTruck);
 							break;
 						case 'P':
-							currentTruck = new PaperTruck(initialLocation, capacity,
-									containerController, truckName, mapMatrix);
+							currentTruck = new PaperTruck(initialLocation,
+									capacity, containerController, truckName,
+									mapMatrix);
 							trucks.add(currentTruck);
 							break;
 						case 'E':
-							currentTruck = new PlasticTruck(initialLocation, capacity,
-									containerController, truckName, mapMatrix);
+							currentTruck = new PlasticTruck(initialLocation,
+									capacity, containerController, truckName,
+									mapMatrix);
 							trucks.add(currentTruck);
 							break;
 						case 'I':
-							currentTruck = new GarbageTruck(initialLocation, capacity,
-									containerController, truckName, mapMatrix);
+							currentTruck = new GarbageTruck(initialLocation,
+									capacity, containerController, truckName,
+									mapMatrix);
 							trucks.add(currentTruck);
 							break;
 						}
 						break;
 					} else if (c == 'T') {
-						route.add(new Point(i,y));
+						route.add(new Point(i, y));
 						count++;
 					} else if (c == '/') {
 						currentTruck.setRoute(route);
 						route = new ArrayList<Point>();
-						y=-1;
+						y = -1;
 						break;
 					}
 				}

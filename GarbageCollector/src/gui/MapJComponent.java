@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -35,5 +37,22 @@ public class MapJComponent extends JComponent {
 							Assets.imgDim.height, null);
 			}
 		}
+	}
+
+	public void repaintElement(MapElement element, Point location) {
+		repaint(MapJComponent.calcRepaintRectangle(location, null));
+	}
+
+	public void repaintTruck(Point from, Point to) {
+		repaint(MapJComponent.calcRepaintRectangle(from, to));
+	}
+
+	private static Rectangle calcRepaintRectangle(Point from, Point to) {
+		Rectangle toRepaint = new Rectangle((from.x + 1) * Assets.imgDim.width,
+				(from.y + 1) * Assets.imgDim.height);
+		if (to != null)
+			toRepaint.add((to.x + 1) * Assets.imgDim.width, (to.y + 1)
+					* Assets.imgDim.height);
+		return toRepaint;
 	}
 }

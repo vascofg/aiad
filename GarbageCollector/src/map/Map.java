@@ -2,7 +2,6 @@ package map;
 
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
-import jade.wrapper.StaleProxyException;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -15,10 +14,6 @@ import assets.Assets;
 import elements.MapElement;
 import elements.Road;
 import elements.containers.Container;
-import elements.trucks.GarbageTruck;
-import elements.trucks.GlassTruck;
-import elements.trucks.PaperTruck;
-import elements.trucks.PlasticTruck;
 import elements.trucks.Truck;
 import files.FileParser;
 
@@ -31,7 +26,9 @@ public class Map {
 	public Graph graph;
 	public AgentController worldAgent;
 
-	public Map() {
+	public static final Map INSTANCE = new Map();
+
+	private Map() {
 		this.mapMatrix = new ArrayList<ArrayList<MapElement>>();
 		this.trucks = new ArrayList<Truck>();
 		this.containers = new ArrayList<Container>();
@@ -131,6 +128,7 @@ public class Map {
 
 	public void initTrucks(ContainerController containerController) {
 		System.out.println("Initializing trucks...");
+
 		List<Truck> parsed = FileParser.parseTrucksFile("maps/big_route.txt",
 				containerController, mapMatrix);
 		for (Truck truck : parsed) {
@@ -168,5 +166,4 @@ public class Map {
 		}
 		System.out.println("Done processing roads");
 	}
-
 }

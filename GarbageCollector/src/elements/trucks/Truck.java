@@ -1,8 +1,8 @@
 package elements.trucks;
 
-import jade.wrapper.AgentState;
 import jade.util.Event;
 import jade.wrapper.AgentController;
+import jade.wrapper.AgentState;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
@@ -173,8 +173,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 				getLocation(), mapMatrix);
 		for (int i = 0; i < 4; i++) {
 			Point p = possibleMoves.get(i);
-			//TODO: se so tiver um possibleMove, ignora from (anda para trás)
-			//TODO: REFACTOR (usar Assets)
+			// TODO: se so tiver um possibleMove, ignora from (anda para trás)
+			// TODO: REFACTOR (usar Assets)
 			if (p != null && i != this.from && route.contains(p)) {
 				this.from = Assets.reverseDirection(i);
 				return this.moveRequest(p);

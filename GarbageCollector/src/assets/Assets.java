@@ -44,14 +44,14 @@ public abstract class Assets {
 			paperTruck = ImageIO.read(new File("img/papertruck.png"));
 			plasticTruck = ImageIO.read(new File("img/plastictruck.png"));
 			garbageTruck = ImageIO.read(new File("img/garbagetruck.png"));
-			imgDim = new Dimension(grass.getWidth()/2, grass.getHeight()/2);
+			imgDim = new Dimension(grass.getWidth() / 2, grass.getHeight() / 2);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static int reverseDirection(int dir) {
-		switch(dir) {
+		switch (dir) {
 		case Assets.TOP:
 			return Assets.BOTTOM;
 		case Assets.BOTTOM:
