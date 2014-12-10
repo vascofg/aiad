@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import map.Map;
-import algorithms.Graph;
+import algorithms.MapGraph;
 import elements.Deposit;
 import elements.Grass;
 import elements.MapElement;
@@ -54,18 +54,20 @@ public class FileParser {
 						lineList.add(grass);
 						break;
 					case 'r': // one way road
-						road = new Road(x, y, false);
+						road = new Road(false);
 						if (map.initialLocation == null)
 							map.initialLocation = new Point(x, y);
 						lineList.add(road);
 						map.roads.add(road);
+						map.roadPoints.add(new Point(x, y));
 						break;
 					case 'R': // two way road
-						road = new Road(x, y, true);
+						road = new Road(true);
 						if (map.initialLocation == null)
 							map.initialLocation = new Point(x, y);
 						lineList.add(road);
 						map.roads.add(road);
+						map.roadPoints.add(new Point(x, y));
 						break;
 					case 'V': // glass container
 						container = new GlassContainer(
@@ -107,7 +109,7 @@ public class FileParser {
 			}
 			in.close();
 			System.out.println("Parsed " + count + " elements");
-			map.graph = new Graph(map);
+			map.graph = new MapGraph(map);
 			map.worldAgent = containerController.createNewAgent("World",
 					"agents.WorldAgent", new Object[0]);
 			map.worldAgent.start();
@@ -125,7 +127,7 @@ public class FileParser {
 	public static List<Truck> parseTrucksFile(String fileName,
 			ContainerController containerController,
 			ArrayList<ArrayList<MapElement>> mapMatrix) {
-		System.out.println("Parsing route file...");
+		System.out.println("Parsing trucks file...");
 		BufferedReader in;
 		try {
 			in = new BufferedReader(new FileReader(fileName));
@@ -133,13 +135,9 @@ public class FileParser {
 			ArrayList<Truck> trucks = new ArrayList<Truck>();
 			Truck currentTruck = null;
 			String line, truckName = null;
-			long count = 0;
+			long count = 0, truckCount = 0;
 			int y = 0, capacity = 0;
 			Point initialLocation = null;
-			/* truck name,truck type,capacity,initialLocation(x,y),route */
-			/*
-			 * Quim V 20 1,1
-			 */
 			while ((line = in.readLine()) != null) {
 				if (line.isEmpty() || line.charAt(0) == '#')
 					continue;
@@ -187,12 +185,14 @@ public class FileParser {
 							trucks.add(currentTruck);
 							break;
 						}
+						truckCount++;
 						break;
 					} else if (c == 'T') {
-						route.add(new Point(i, y));
+						Point roadP = new Point(i, y);
+						route.add(roadP);
 						count++;
 					} else if (c == '/') {
-						currentTruck.setRoute(route);
+						currentTruck.setPointsToVisit(route);
 						route = new ArrayList<Point>();
 						y = -1;
 						break;
@@ -201,7 +201,8 @@ public class FileParser {
 				y++;
 			}
 			in.close();
-			System.out.println("Parsed " + count + " route elements");
+			System.out.println("Parsed " + truckCount + " trucks and " + count
+					+ " route elements");
 			return trucks;
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found!");

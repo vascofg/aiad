@@ -8,8 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import algorithms.Dijkstra;
-import algorithms.Graph;
+import algorithms.MapGraph;
 import assets.Assets;
 import elements.MapElement;
 import elements.Road;
@@ -21,9 +20,10 @@ public class Map {
 	public ArrayList<ArrayList<MapElement>> mapMatrix;
 	public ArrayList<Truck> trucks;
 	public ArrayList<Container> containers;
-	public ArrayList<Road> roads;
+	public ArrayList<Road> roads; // TODO: Remover isto?
+	public ArrayList<Point> roadPoints;
 	public Point initialLocation;
-	public Graph graph;
+	public MapGraph graph;
 	public AgentController worldAgent;
 
 	public static final Map INSTANCE = new Map();
@@ -33,6 +33,7 @@ public class Map {
 		this.trucks = new ArrayList<Truck>();
 		this.containers = new ArrayList<Container>();
 		this.roads = new ArrayList<Road>();
+		this.roadPoints = new ArrayList<Point>();
 	}
 
 	public static <T extends MapElement> T getElement(Class<T> clazz,
@@ -132,6 +133,8 @@ public class Map {
 		List<Truck> parsed = FileParser.parseTrucksFile("maps/big_route.txt",
 				containerController, mapMatrix);
 		for (Truck truck : parsed) {
+			getElement(Road.class, truck.getLocation(), mapMatrix).setTruck(
+					truck);
 			trucks.add(truck);
 			truck.start();
 		}
@@ -156,14 +159,5 @@ public class Map {
 			if (truck.getAgentName().equals(agentName))
 				return truck;
 		return null;
-	}
-
-	public void initRoads(Graph graph) {
-		System.out.println("Initializing roads...");
-		for (Road road : roads) {
-			road.dijkstra = new Dijkstra(graph);
-			road.dijkstra.execute(graph.getVertexByID(road.getID()));
-		}
-		System.out.println("Done processing roads");
 	}
 }

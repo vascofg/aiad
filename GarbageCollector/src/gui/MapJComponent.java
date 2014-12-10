@@ -48,11 +48,15 @@ public class MapJComponent extends JComponent {
 	}
 
 	private static Rectangle calcRepaintRectangle(Point from, Point to) {
-		Rectangle toRepaint = new Rectangle((from.x + 1) * Assets.imgDim.width,
-				(from.y + 1) * Assets.imgDim.height);
-		if (to != null)
-			toRepaint.add((to.x + 1) * Assets.imgDim.width, (to.y + 1)
-					* Assets.imgDim.height);
+		Rectangle toRepaint = new Rectangle(from.x * Assets.imgDim.width,
+				from.y * Assets.imgDim.height, Assets.imgDim.width,
+				Assets.imgDim.height);
+		if (to != null) {
+			Rectangle rectTo = new Rectangle(to.x * Assets.imgDim.width, to.y
+					* Assets.imgDim.height, Assets.imgDim.width,
+					Assets.imgDim.height);
+			toRepaint.add(rectTo);
+		}
 		return toRepaint;
 	}
 }

@@ -1,6 +1,7 @@
 package main;
 
 import files.FileParser;
+import gui.JGraphFrame;
 import gui.MapJFrame;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
@@ -16,6 +17,7 @@ public class GarbageCollector {
 	public static MapJFrame frame;
 	private static ContainerThread containerThread;
 	private static ContainerController containerController;
+	private static JGraphFrame jgraphFrame;
 	public static final Random randGenerator = new Random();
 
 	private static ContainerController startJADE() {
@@ -36,16 +38,18 @@ public class GarbageCollector {
 		containerController = startJADE();
 		Assets.loadAssets();
 		FileParser.parseMapFile("maps/big.txt", containerController);
-		// map.initRoads(graph);
 
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				frame = new MapJFrame("Garbage Collector");
+				// jgraphFrame = new JGraphFrame(Map.INSTANCE.graph.graph);
 				containerThread = new ContainerThread();
 				containerThread.start();
 				Map.INSTANCE.initTrucks(containerController);
+				frame.mapComponent.repaint(); // repaint all after initing
+												// trucks
 			}
 		});
 	}

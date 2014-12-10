@@ -12,11 +12,13 @@ import java.util.List;
 
 import main.GarbageCollector;
 import map.Map;
+
+import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultEdge;
+
 import agents.TruckAgent;
-import assets.Assets;
 import elements.DrawableElement;
 import elements.MapElement;
-import elements.Road;
 import elements.containers.Container;
 import exceptions.TruckFullException;
 
@@ -24,13 +26,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	public static int defaultCapacity = 20;
 
-	private int from;
 	private Point currentLocation;
-	private ArrayList<Point> route;
+	private ArrayList<Point> pointsToVisit;
+	private int pointIndex;
+	private List<DefaultEdge> currentDestinationRoute;
 	private ArrayList<ArrayList<MapElement>> mapMatrix;
 	private String agentName;
 	public AgentController agentController;
-	int capacity, usedCapacity;
+	private int capacity, usedCapacity;
 
 	private boolean go = true;
 	private static final int tickTime = 500; // in ms
@@ -74,12 +77,10 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.currentLocation = destination;
 	}
 
-	public ArrayList<Point> getRoute() {
-		return route;
-	}
-
-	public void setRoute(ArrayList<Point> route) {
-		this.route = route;
+	public void setPointsToVisit(ArrayList<Point> route) {
+		this.pointsToVisit = route;
+		this.currentDestinationRoute = new ArrayList<>();
+		this.pointIndex = 0;
 	}
 
 	public boolean emptyAdjacentContainers(List<Container> adjacentContainers,
@@ -169,16 +170,20 @@ public abstract class Truck extends Thread implements DrawableElement {
 	}
 
 	public boolean goRoute() throws StaleProxyException, InterruptedException {
-		List<Point> possibleMoves = Map.getAllAdjacentPoints(Road.class,
-				getLocation(), mapMatrix);
-		for (int i = 0; i < 4; i++) {
-			Point p = possibleMoves.get(i);
-			// TODO: se so tiver um possibleMove, ignora from (anda para trás)
-			// TODO: REFACTOR (usar Assets)
-			if (p != null && i != this.from && route.contains(p)) {
-				this.from = Assets.reverseDirection(i);
-				return this.moveRequest(p);
-			}
+		if (pointIndex == pointsToVisit.size())
+			pointIndex = 0; // TODO: ESTRATEGIAS
+		Point currentDestination = pointsToVisit.get(pointIndex);
+		if (currentDestinationRoute.isEmpty()) {
+			//TODO: guardar rota entre 2 containers
+			currentDestinationRoute = DijkstraShortestPath.findPathBetween(
+					Map.INSTANCE.graph, currentLocation, currentDestination);
+		}
+		DefaultEdge current = currentDestinationRoute.get(0);
+		if (this.moveRequest(Map.INSTANCE.graph.getEdgeTarget(current))) {
+			currentDestinationRoute.remove(0);
+			if (currentLocation.equals(currentDestination))
+				pointIndex++;
+			return true;
 		}
 		return false;
 	}
