@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import algorithms.Dijkstra;
 import algorithms.Graph;
 import assets.Assets;
 import elements.MapElement;
@@ -19,6 +20,7 @@ import elements.trucks.GlassTruck;
 import elements.trucks.PaperTruck;
 import elements.trucks.PlasticTruck;
 import elements.trucks.Truck;
+import files.FileParser;
 
 public class Map {
 	public ArrayList<ArrayList<MapElement>> mapMatrix;
@@ -96,12 +98,20 @@ public class Map {
 		T rightElement = getElement(clazz, rightPoint, mapMatrix);
 		if (topElement != null)
 			list.add(topPoint);
+		else
+			list.add(null);
 		if (bottomElement != null)
 			list.add(bottomPoint);
+		else
+			list.add(null);
 		if (leftElement != null)
 			list.add(leftPoint);
+		else
+			list.add(null);
 		if (rightElement != null)
 			list.add(rightPoint);
+		else
+			list.add(null);
 		return list;
 	}
 
@@ -111,40 +121,21 @@ public class Map {
 		List<Point> points = getAllAdjacentPoints(clazz, location, mapMatrix);
 		List<T> elements = new LinkedList<>();
 		for (Point point : points) {
-			elements.add(Map.<T> getElement(clazz, point, mapMatrix));
+			if (point != null)
+				elements.add(Map.<T> getElement(clazz, point, mapMatrix));
+			else
+				elements.add(null);
 		}
 		return elements;
 	}
 
 	public void initTrucks(ContainerController containerController) {
 		System.out.println("Initializing trucks...");
-		try {
-			
-			PaperTruck paper = new PaperTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Papel", this.mapMatrix);
-			trucks.add(paper);
-			paper.start();
-			
-			
-			PlasticTruck plastic = new PlasticTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Plastico", this.mapMatrix);
-			trucks.add(plastic);
-			plastic.start();
-			
-			
-			GlassTruck glass = new GlassTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Vidro", this.mapMatrix);
-			trucks.add(glass);
-			glass.start();
-			
-			
-			GarbageTruck garbage = new GarbageTruck(initialLocation, Truck.defaultCapacity,
-					containerController, "Lixo", this.mapMatrix);
-			trucks.add(garbage);
-			garbage.start();
-		} catch (StaleProxyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		List<Truck> parsed = FileParser.parseTrucksFile("maps/big_route.txt",
+				containerController, mapMatrix);
+		for (Truck truck : parsed) {
+			trucks.add(truck);
+			truck.start();
 		}
 	}
 
@@ -160,18 +151,22 @@ public class Map {
 		}
 		return returnMatrix;
 	}
-	
-	public static Truck getTruckByAgentName(String agentName, ArrayList<Truck> trucks) {
-		for(Truck truck : trucks)
-			if(truck.getAgentName().equals(agentName))
+
+	public static Truck getTruckByAgentName(String agentName,
+			ArrayList<Truck> trucks) {
+		for (Truck truck : trucks)
+			if (truck.getAgentName().equals(agentName))
 				return truck;
 		return null;
 	}
-	
-	/*
-	 * public void initRoads(Graph graph) {
-	 * System.out.println("Initializing roads..."); for (Road road : roads) {
-	 * road.dijkstra = new Dijkstra(graph);
-	 * road.dijkstra.execute(graph.getVertexByID(road.getID())); } }
-	 */
+
+	public void initRoads(Graph graph) {
+		System.out.println("Initializing roads...");
+		for (Road road : roads) {
+			road.dijkstra = new Dijkstra(graph);
+			road.dijkstra.execute(graph.getVertexByID(road.getID()));
+		}
+		System.out.println("Done processing roads");
+	}
+
 }

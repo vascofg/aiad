@@ -13,6 +13,7 @@ import java.util.List;
 import main.GarbageCollector;
 import map.Map;
 import agents.TruckAgent;
+import assets.Assets;
 import elements.DrawableElement;
 import elements.MapElement;
 import elements.Road;
@@ -23,7 +24,9 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	public static int defaultCapacity = 20;
 
+	private int from;
 	private Point currentLocation;
+	private ArrayList<Point> route;
 	private ArrayList<ArrayList<MapElement>> mapMatrix;
 	private String agentName;
 	public AgentController agentController;
@@ -71,12 +74,22 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.currentLocation = destination;
 	}
 
+	public ArrayList<Point> getRoute() {
+		return route;
+	}
+
+	public void setRoute(ArrayList<Point> route) {
+		this.route = route;
+	}
+
 	public boolean emptyAdjacentContainers(List<Container> adjacentContainers,
 			List<Point> adjacentContainerPoints) {
 		boolean emptiedAny = false;
 		try {
 			for (int i = 0; i < adjacentContainers.size(); i++) {
 				Container c = adjacentContainers.get(i);
+				if (c == null)
+					continue;
 				Point p = adjacentContainerPoints.get(i);
 				if (c.truckCompatible(this)) {
 					if (containerRequest(p.x, p.y))
@@ -110,8 +123,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public boolean containerRequest(int X, int Y) throws StaleProxyException,
 			InterruptedException {
 		Event event = new Event(TruckAgent.REQUEST_CONTAINER_CAPACITY, this);
-		event.addParameter(new String(TruckAgent.REQUEST_CONTAINER_CAPACITY + " "
-				+ X + " " + Y));
+		event.addParameter(new String(TruckAgent.REQUEST_CONTAINER_CAPACITY
+				+ " " + X + " " + Y));
 		event.addParameter(new Point(X, Y));
 		this.agentController.putO2AObject(event, false);
 
@@ -155,6 +168,21 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return false;
 	}
 
+	public boolean goRoute() throws StaleProxyException, InterruptedException {
+		List<Point> possibleMoves = Map.getAllAdjacentPoints(Road.class,
+				getLocation(), mapMatrix);
+		for (int i = 0; i < 4; i++) {
+			Point p = possibleMoves.get(i);
+			//TODO: se so tiver um possibleMove, ignora from (anda para trás)
+			//TODO: REFACTOR (usar Assets)
+			if (p != null && i != this.from && route.contains(p)) {
+				this.from = Assets.reverseDirection(i);
+				return this.moveRequest(p);
+			}
+		}
+		return false;
+	}
+
 	/* THREAD */
 
 	@Override
@@ -168,12 +196,11 @@ public abstract class Truck extends Thread implements DrawableElement {
 		while (go) {
 			try {
 				if (agentController.getState().getCode() == AgentState.cAGENT_STATE_IDLE) {
-					this.moveRandomDirection(Map.getAllAdjacentPoints(
-							Road.class, getLocation(), mapMatrix));
-					emptyAdjacentContainers(Map.getAllAdjacentElements(
-							Container.class, getLocation(), mapMatrix),
-							Map.getAllAdjacentPoints(Container.class,
-									getLocation(), mapMatrix));
+					if (this.goRoute())
+						emptyAdjacentContainers(Map.getAllAdjacentElements(
+								Container.class, getLocation(), mapMatrix),
+								Map.getAllAdjacentPoints(Container.class,
+										getLocation(), mapMatrix));
 				}
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {

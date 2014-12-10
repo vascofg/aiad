@@ -28,13 +28,16 @@ public class Graph {
 					Map.findElement(Road.class, road, map.mapMatrix),
 					map.mapMatrix);
 			for (Road adjacent : adjacentRoads) {
-				Vertex adjacentVertex = getVertexByID(adjacent.getID());
-				this.edges.add(new Edge(road.getID() + "->" + adjacent.getID(),
-						currentVertex, adjacentVertex, 1));
+				if (adjacent != null) {
+					Vertex adjacentVertex = getVertexByID(adjacent.getID());
+					this.edges.add(new Edge(road.getID() + "->"
+							+ adjacent.getID(), currentVertex, adjacentVertex,
+							1));
+				}
 			}
 		}
-		System.out.println("Processed " + this.vertexes.size() + " vertexes and "
-				+ this.edges.size() + " edges");
+		System.out.println("Processed " + this.vertexes.size()
+				+ " vertexes and " + this.edges.size() + " edges");
 	}
 
 	public List<Vertex> getVertexes() {

@@ -36,8 +36,8 @@ public class GarbageCollector {
 		System.out.println("Starting JADE...");
 		containerController = startJADE();
 		Assets.loadAssets();
-		map = FileParser.parseFile("maps/simple.txt", containerController);
-		// map.initRoads(graph);
+		map = FileParser.parseMapFile("maps/big.txt", containerController);
+		map.initRoads(map.graph);
 
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
