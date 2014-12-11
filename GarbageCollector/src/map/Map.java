@@ -123,6 +123,7 @@ public class Map {
 		List<Truck> parsed = FileParser.parseTrucksFile("maps/big_route.txt",
 				containerController, mapMatrix);
 		for (Truck truck : parsed) {
+			//TODO: trucks must send new truck message to world agent
 			getElement(Road.class, truck.getLocation(), mapMatrix).setTruck(
 					truck);
 			trucks.add(truck);

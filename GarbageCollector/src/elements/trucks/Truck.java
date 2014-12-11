@@ -17,6 +17,7 @@ import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
 
 import agents.TruckAgent;
+import assets.Assets;
 import elements.DrawableElement;
 import elements.MapElement;
 import elements.Road;
@@ -29,7 +30,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	private Point currentLocation, currentDestination;
 	private ArrayList<Point> pointsToVisit;
-	private int pointIndex;
+	private int pointIndex, moveDirection;
 	private List<DefaultEdge> currentDestinationRoute;
 	private ArrayList<ArrayList<MapElement>> mapMatrix;
 	private String agentName;
@@ -39,7 +40,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	private Thread waitInformThread;
 
 	private boolean go = true;
-	private static final int tickTime = 500; // in ms
+	private static final int tickTime = 250; // in ms
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -90,6 +91,10 @@ public abstract class Truck extends Thread implements DrawableElement {
 	}
 
 	public void moveTruck(Point destination) {
+		int moveDirection = Assets.getMoveDirection(this.getLocation(),
+				destination);
+		if (moveDirection > -1) // actual move
+			this.setMoveDirection(moveDirection);
 		this.currentLocation = destination;
 	}
 
@@ -157,7 +162,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 			InterruptedException {
 		Event event = new Event(TruckAgent.REQUEST_MOVE, this);
 		event.addParameter(new String(this.agentName + " " + destination.x
-				+ " " + destination.y));
+				+ " " + destination.y + " "
+				+ Assets.getMoveDirection(this.getLocation(), destination)));
 		this.agentController.putO2AObject(event, false);
 
 		boolean result = (boolean) event.waitUntilProcessed(); // TODO:
@@ -181,6 +187,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 	}
 
 	public boolean goRoute() throws StaleProxyException, InterruptedException {
+		if (pointsToVisit.size() <= 1)
+			return false;
 		if (pointIndex == pointsToVisit.size())
 			pointIndex = 0; // TODO: ESTRATEGIAS
 		if (currentDestination == null)
@@ -264,8 +272,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 							System.out.println(agentName
 									+ " added point to visit: " + toVisit.x
 									+ "|" + toVisit.y);
-							gotInformEvent.reset();
 						}
+						gotInformEvent.reset();
 					}
 				} catch (InterruptedException e) {
 					System.out.println("Inform thread interrupted!");
@@ -273,5 +281,13 @@ public abstract class Truck extends Thread implements DrawableElement {
 				}
 			}
 		});
+	}
+
+	public int getMoveDirection() {
+		return moveDirection;
+	}
+
+	public void setMoveDirection(int moveDirection) {
+		this.moveDirection = moveDirection;
 	}
 }

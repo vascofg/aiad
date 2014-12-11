@@ -22,6 +22,7 @@ public class WorldAgent extends Agent {
 			CONFIRM_REFUSE_MOVE = 6;
 
 	// método setup
+	@Override
 	protected void setup() {
 		// regista agente no DF
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -71,10 +72,14 @@ public class WorldAgent extends Agent {
 								map.trucks);
 						point = new Point(Integer.parseInt(args[2]),
 								Integer.parseInt(args[3]));
+						int moveDir = Integer.parseInt(args[4]);
 						boolean canMove = true;
-						for (Truck t : map.trucks)
-							if (t.getLocation().equals(point))
+						for (Truck t : map.trucks) {
+							Road road = Map.getElement(Road.class, t.getLocation(), map.mapMatrix);
+							if (t.getLocation().equals(point)
+									&& (t.getMoveDirection() == moveDir || !road.isTwoWay()))
 								canMove = false;
+						}
 						if (canMove) {
 							sendMsg = new ACLMessage(ACLMessage.CONFIRM);
 							Point from = truck.getLocation();
@@ -124,6 +129,7 @@ public class WorldAgent extends Agent {
 	}
 
 	// método takeDown
+	@Override
 	protected void takeDown() {
 		// retira registo no DF
 		try {

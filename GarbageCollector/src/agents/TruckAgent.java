@@ -24,6 +24,7 @@ public class TruckAgent extends Agent {
 			GOT_INFORM_EVENT = 7;
 
 	// método setup
+	@Override
 	protected void setup() {
 		// regista agente no DF
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -62,10 +63,10 @@ public class TruckAgent extends Agent {
 					int informType = Integer.parseInt(args[0]);
 					switch (informType) {
 					case TruckAgent.INFORM_OTHER_TRUCKS:
-						System.out.println(myAgent.getName()
+						/*System.out.println(myAgent.getName()
 								+ " got INFORM from "
 								+ msg.getSender().getName() + ": "
-								+ msg.getContent());
+								+ msg.getContent());*/
 						myTruckAgent.gotInformEvent.notifyProcessed(new Point(
 								Integer.parseInt(args[1]), Integer
 										.parseInt(args[2])));
@@ -155,9 +156,9 @@ public class TruckAgent extends Agent {
 							myTruckAgent.event = event;
 							msg = new ACLMessage(ACLMessage.REQUEST);
 							msg.addReceiver(worldAgent);
-							// REQUEST_TYPE + TRUCK_NAME + X + Y
+							// REQUEST_TYPE + TRUCK_NAME + X + Y + MOVE_DIR
 							toSend = event.getType() + " " + args[0] + " " + args[1]
-									+ " " + args[2];
+									+ " " + args[2] + " " + args[3];
 							break;
 						case TruckAgent.INFORM_EMPTIED_CONTAINER:
 							msg = new ACLMessage(ACLMessage.INFORM);
@@ -194,6 +195,7 @@ public class TruckAgent extends Agent {
 	}
 
 	// método takeDown
+	@Override
 	protected void takeDown() {
 		// retira registo no DF
 		try {

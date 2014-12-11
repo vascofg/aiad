@@ -1,6 +1,7 @@
 package assets;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +62,18 @@ public abstract class Assets {
 		case Assets.RIGHT:
 			return Assets.LEFT;
 		}
-		return 99;
+		throw new IllegalArgumentException();
+	}
+	
+	public static int getMoveDirection(Point source, Point dest) {
+		if(source.x>dest.x)
+			return Assets.LEFT;
+		if(source.x<dest.x)
+			return Assets.RIGHT;
+		if(source.y>dest.y)
+			return Assets.BOTTOM;
+		if(source.y<dest.y)
+			return Assets.TOP;
+		return -1;
 	}
 }

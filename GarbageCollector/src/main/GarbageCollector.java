@@ -7,6 +7,7 @@ import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+import java.io.IOException;
 import java.util.Random;
 
 import map.Map;
@@ -23,13 +24,13 @@ public class GarbageCollector {
 	private static ContainerController startJADE() {
 		ContainerController c = jade.core.Runtime.instance()
 				.createMainContainer(new ProfileImpl(true));
-		try {
+		/*try {
 			c.createNewAgent("rma", "jade.tools.rma.rma", new Object[0])
 					.start();
 		} catch (StaleProxyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		return c;
 	}
 
@@ -42,6 +43,7 @@ public class GarbageCollector {
 		// Schedule a job for the event-dispatching thread:
 		// creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				frame = new MapJFrame("Garbage Collector");
 				//jgraphFrame = new JGraphFrame(Map.INSTANCE.graph);

@@ -1,7 +1,7 @@
 package gui;
 
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Point;
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public class JGraphFrame extends JFrame {
 		jgraph.getGraphLayoutCache().update();
 		jgraph.refresh();
 		this.setExtendedState(this.getExtendedState()
-				| JFrame.MAXIMIZED_BOTH);
+				| Frame.MAXIMIZED_BOTH);
 		adjustDisplaySettings(jgraph);
 		this.getContentPane().add(jgraph);
 		this.setVisible(true);

@@ -37,4 +37,8 @@ public class Road extends MapElement implements DrawableElement {
 	public void removeTruck() {
 		this.truck = null;
 	}
+	
+	public boolean isTwoWay() {
+		return twoWay;
+	}
 }
