@@ -40,8 +40,7 @@ public class JGraphFrame extends JFrame {
 
 		jgraph.getGraphLayoutCache().update();
 		jgraph.refresh();
-		this.setExtendedState(this.getExtendedState()
-				| Frame.MAXIMIZED_BOTH);
+		this.setExtendedState(this.getExtendedState() | Frame.MAXIMIZED_BOTH);
 		adjustDisplaySettings(jgraph);
 		this.getContentPane().add(jgraph);
 		this.setVisible(true);

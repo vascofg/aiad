@@ -75,9 +75,11 @@ public class WorldAgent extends Agent {
 						int moveDir = Integer.parseInt(args[4]);
 						boolean canMove = true;
 						for (Truck t : map.trucks) {
-							Road road = Map.getElement(Road.class, t.getLocation(), map.mapMatrix);
+							Road road = Map.getElement(Road.class,
+									t.getLocation(), map.mapMatrix);
 							if (t.getLocation().equals(point)
-									&& (t.getMoveDirection() == moveDir || !road.isTwoWay()))
+									&& (t.getMoveDirection() == moveDir || !road
+											.isTwoWay()))
 								canMove = false;
 						}
 						if (canMove) {
@@ -90,7 +92,7 @@ public class WorldAgent extends Agent {
 							Road roadTo = Map.getElement(Road.class, to,
 									map.mapMatrix);
 							roadTo.setTruck(truck);
-							// TODO: evitar que apague no inicio (vários na
+							// TODO: evitar que apague no inicio (vï¿½rios na
 							// mesma road)
 							roadFrom.removeTruck();
 							GarbageCollector.frame.mapComponent.repaintTruck(
@@ -114,7 +116,8 @@ public class WorldAgent extends Agent {
 						return; // no response to send
 					default:
 						System.out
-								.println("(WorldAgent) GOT UNEXPECTED MESSAGE TYPE!");
+								.println("(WorldAgent) GOT UNEXPECTED MESSAGE TYPE ("
+										+ requestType + ")!");
 						return;
 					}
 					sendMsg.addReceiver(msg.getSender());

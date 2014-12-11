@@ -50,7 +50,7 @@ ER--------R-----R-ER--------R-----R-
 -R--------R--E--R--R--------R--E--R-
 -RRRRRRRRRRRRRRRR--RRRRRRRRRRRRRRRR-
 ------------------------------------
-nZé
+nZe
 c10
 i1,2
 tP
@@ -78,7 +78,7 @@ ET--------R-----R-ET--------R-----R-
 -R--------R--E--R--R--------R--E--R-
 -RRRRRRRRRRRRRRRR--RRRRRRRRRRRRRRRR-
 ------------------------------------
-nTó
+nTone
 c10
 i1,2
 tE
@@ -106,7 +106,7 @@ ER--------R-----R-ER--------R-----R-
 -R--------R--E--R--R--------R--E--R-
 -RRRRRRRRRRRRRRRR--RRRRRRRRRRRRRRRR-
 ------------------------------------
-nNando
+nArmando
 c10
 i1,2
 tI
@@ -134,7 +134,7 @@ ER--------R-----R-ER--------R-----R-
 -R--------R--E--R--R--------R--E--R-
 -RRRRRRRRRRRRRRRR--RRRRRRRRRRRRRRRR-
 ------------------------------------
-nChico-esperto
+nChico
 c10
 i12,12
 tI

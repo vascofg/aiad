@@ -64,15 +64,15 @@ public abstract class Assets {
 		}
 		throw new IllegalArgumentException();
 	}
-	
+
 	public static int getMoveDirection(Point source, Point dest) {
-		if(source.x>dest.x)
+		if (source.x > dest.x)
 			return Assets.LEFT;
-		if(source.x<dest.x)
+		if (source.x < dest.x)
 			return Assets.RIGHT;
-		if(source.y>dest.y)
+		if (source.y > dest.y)
 			return Assets.BOTTOM;
-		if(source.y<dest.y)
+		if (source.y < dest.y)
 			return Assets.TOP;
 		return -1;
 	}

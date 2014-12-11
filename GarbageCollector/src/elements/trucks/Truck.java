@@ -8,6 +8,7 @@ import jade.wrapper.StaleProxyException;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import main.GarbageCollector;
@@ -20,7 +21,6 @@ import agents.TruckAgent;
 import assets.Assets;
 import elements.DrawableElement;
 import elements.MapElement;
-import elements.Road;
 import elements.containers.Container;
 import exceptions.TruckFullException;
 
@@ -28,24 +28,28 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	public static int defaultCapacity = 20;
 
-	private Point currentLocation, currentDestination;
-	private ArrayList<Point> pointsToVisit;
+	Point currentLocation;
+
+	private Point currentDestination;
+	ArrayList<Point> pointsToVisit;
 	private int pointIndex, moveDirection;
-	private List<DefaultEdge> currentDestinationRoute;
-	private ArrayList<ArrayList<MapElement>> mapMatrix;
-	private String agentName;
+	private ArrayList<DefaultEdge> currentDestinationRoute;
+	private HashMap<ArrayList<Point>, List<DefaultEdge>> routes;
+	ArrayList<ArrayList<MapElement>> mapMatrix;
+	String agentName;
 	public AgentController agentController;
 	private int capacity, usedCapacity;
-	private Event gotInformEvent;
+	Event gotInformEvent;
 	private Thread waitInformThread;
 
 	private boolean go = true;
-	private static final int tickTime = 250; // in ms
+	static final int tickTime = 50; // in ms
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
 			int agentType, ArrayList<ArrayList<MapElement>> matrix)
 			throws StaleProxyException {
+		super(name + " truck");
 		this.currentLocation = initialLocation;
 		this.capacity = capacity;
 		this.usedCapacity = 0;
@@ -64,9 +68,9 @@ public abstract class Truck extends Thread implements DrawableElement {
 		}
 		this.gotInformEvent = new Event(TruckAgent.GOT_INFORM_EVENT, this);
 		this.agentController.putO2AObject(this.gotInformEvent, true);
-		createInformThread();
-		this.waitInformThread.start();
 		this.agentName = name;
+		this.waitInformThread = new TruckInform(this);
+		this.waitInformThread.start();
 	}
 
 	public String getAgentName() {
@@ -101,6 +105,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void setPointsToVisit(ArrayList<Point> route) {
 		this.pointsToVisit = route;
 		this.currentDestinationRoute = new ArrayList<>();
+		this.routes = new HashMap<ArrayList<Point>, List<DefaultEdge>>();
 		this.pointIndex = 0;
 	}
 
@@ -194,9 +199,15 @@ public abstract class Truck extends Thread implements DrawableElement {
 		if (currentDestination == null)
 			currentDestination = pointsToVisit.get(pointIndex);
 		if (currentDestinationRoute.isEmpty()) {
-			// TODO: guardar rota entre 2 containers
-			currentDestinationRoute = DijkstraShortestPath.findPathBetween(
-					Map.INSTANCE.graph, currentLocation, currentDestination);
+			ArrayList<Point> points = new ArrayList<Point>();
+			points.add(currentLocation);
+			points.add(currentDestination);
+			if (!routes.containsKey(points))
+				routes.put(points, DijkstraShortestPath
+						.findPathBetween(Map.INSTANCE.graph, currentLocation,
+								currentDestination));
+			currentDestinationRoute = new ArrayList<DefaultEdge>(
+					routes.get(points));
 		}
 		DefaultEdge currentEdge = currentDestinationRoute.get(0);
 		if (this.moveRequest(Map.INSTANCE.graph.getEdgeTarget(currentEdge))) {
@@ -240,47 +251,6 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void interrupt() {
 		this.go = false;
 		super.interrupt();
-	}
-
-	private void createInformThread() {
-		this.waitInformThread = new Thread(new Runnable() {
-			private boolean go = true;
-
-			@Override
-			public void run() {
-				try {
-					while (go) {
-						Point container = (Point) gotInformEvent
-								.waitUntilProcessed();
-						// TODO: processo de decisão (qual dos trucks vai lá)
-						List<Point> adjacentRoads = Map.getAllAdjacentPoints(
-								Road.class, container, mapMatrix);
-						boolean contains = false;
-						for (Point road : adjacentRoads)
-							if (pointsToVisit.contains(road)) {
-								contains = true;
-								break;
-							}
-						if (!contains) {
-							// TODO: optimizar qual das estradas escolher
-							Point toVisit = adjacentRoads.get(0);
-							// TODO: interface para opções
-							pointsToVisit.add(toVisit); // permanente (no final
-														// da
-														// rota actual)
-							// currentDestination = toVisit; //imediato
-							System.out.println(agentName
-									+ " added point to visit: " + toVisit.x
-									+ "|" + toVisit.y);
-						}
-						gotInformEvent.reset();
-					}
-				} catch (InterruptedException e) {
-					System.out.println("Inform thread interrupted!");
-					this.go = false;
-				}
-			}
-		});
 	}
 
 	public int getMoveDirection() {
