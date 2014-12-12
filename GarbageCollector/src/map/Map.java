@@ -22,7 +22,7 @@ public class Map {
 	public ArrayList<Container> containers;
 	public ArrayList<Road> roads; // TODO: Remover isto?
 	public ArrayList<Point> roadPoints;
-	public Point initialLocation;
+	public ArrayList<Point> depositPoints;
 	public MapGraph graph;
 	public AgentController worldAgent;
 
@@ -34,6 +34,7 @@ public class Map {
 		this.containers = new ArrayList<Container>();
 		this.roads = new ArrayList<Road>();
 		this.roadPoints = new ArrayList<Point>();
+		this.depositPoints = new ArrayList<Point>();
 	}
 
 	public static <T extends MapElement> T getElement(Class<T> clazz,

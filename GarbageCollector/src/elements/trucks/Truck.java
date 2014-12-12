@@ -19,8 +19,10 @@ import org.jgrapht.graph.DefaultEdge;
 
 import agents.TruckAgent;
 import assets.Assets;
+import elements.Deposit;
 import elements.DrawableElement;
 import elements.MapElement;
+import elements.Road;
 import elements.containers.Container;
 import exceptions.TruckFullException;
 
@@ -43,7 +45,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	private Thread waitInformThread;
 
 	private boolean go = true;
-	static final int tickTime = 50; // in ms
+	private static final int tickTime = 50; // in ms
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -130,6 +132,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return emptiedAny;
 	}
 
+	public boolean emptyInDeposit(List<Point> adjacentDeposits) {
+		if (adjacentDeposits.size() > 0) {
+			this.emptyTruck();
+			return true;
+		}
+		return false;
+	}
+
 	public void containerInform(int garbageType, int X, int Y)
 			throws StaleProxyException {
 		Event event = new Event(TruckAgent.INFORM_OTHER_TRUCKS, this);
@@ -150,17 +160,47 @@ public abstract class Truck extends Thread implements DrawableElement {
 		event.addParameter(new Point(X, Y));
 		this.agentController.putO2AObject(event, false);
 
-		int usedCapacity = (int) event.waitUntilProcessed();
-		if (usedCapacity > 0) {
+		int usedContainerCapacity = (int) event.waitUntilProcessed();
+		if (usedContainerCapacity > 0) {
 			try {
-				this.addToTruck(usedCapacity);
+				this.addToTruck(usedContainerCapacity);
 				emptiedContainerInform(X, Y);
 				return true;
+				// TODO: esvaziar o que puder (tem de avisar mundo)
+				// TODO: ir esvaziar quando acima de x capacidade usada
 			} catch (TruckFullException e) {
 				containerInform(this.getType(), X, Y);
+				this.currentDestination = getClosestDeposit();
+				System.out.println(getAgentName() + " is full, going to "
+						+ this.currentDestination.x + "|"
+						+ this.currentDestination.y + " to empty...");
 			}
 		}
 		return false;
+	}
+
+	private Point getClosestDeposit() {
+		int minDistance = Integer.MAX_VALUE;
+		Point closestDeposit = null;
+		for (Point deposit : Map.INSTANCE.depositPoints) {
+			// TODO: optimizar estrada a escolher
+			Point road = Map.getAllAdjacentPoints(Road.class, deposit,
+					mapMatrix).get(0);
+			ArrayList<Point> points = new ArrayList<Point>(2);
+			points.add(currentLocation);
+			points.add(road);
+			List<DefaultEdge> path;
+			if (!this.routes.containsKey(points)) {
+				path = DijkstraShortestPath.findPathBetween(Map.INSTANCE.graph,
+						currentLocation, road);
+				this.routes.put(points, path);
+			} else
+				path = this.routes.get(points);
+
+			if (path.size() < minDistance)
+				closestDeposit = road;
+		}
+		return closestDeposit;
 	}
 
 	public boolean moveRequest(Point destination) throws StaleProxyException,
@@ -192,14 +232,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 	}
 
 	public boolean goRoute() throws StaleProxyException, InterruptedException {
-		if (pointsToVisit.size() <= 1)
+		if (pointsToVisit.size() < 1)
 			return false;
 		if (pointIndex == pointsToVisit.size())
 			pointIndex = 0; // TODO: ESTRATEGIAS
 		if (currentDestination == null)
 			currentDestination = pointsToVisit.get(pointIndex);
 		if (currentDestinationRoute.isEmpty()) {
-			ArrayList<Point> points = new ArrayList<Point>();
+			ArrayList<Point> points = new ArrayList<Point>(2);
 			points.add(currentLocation);
 			points.add(currentDestination);
 			if (!routes.containsKey(points))
@@ -209,14 +249,16 @@ public abstract class Truck extends Thread implements DrawableElement {
 			currentDestinationRoute = new ArrayList<DefaultEdge>(
 					routes.get(points));
 		}
-		DefaultEdge currentEdge = currentDestinationRoute.get(0);
-		if (this.moveRequest(Map.INSTANCE.graph.getEdgeTarget(currentEdge))) {
-			currentDestinationRoute.remove(0);
-			if (currentLocation.equals(currentDestination)) {
-				pointIndex++;
-				currentDestination = null;
+		if (!currentDestinationRoute.isEmpty()) {
+			DefaultEdge currentEdge = currentDestinationRoute.get(0);
+			if (this.moveRequest(Map.INSTANCE.graph.getEdgeTarget(currentEdge))) {
+				currentDestinationRoute.remove(0);
+				if (currentLocation.equals(currentDestination)) {
+					pointIndex++;
+					currentDestination = null;
+				}
+				return true;
 			}
-			return true;
 		}
 		return false;
 	}
@@ -233,11 +275,22 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void run() {
 		while (go) {
 			try {
-				if (this.goRoute())
-					emptyAdjacentContainers(Map.getAllAdjacentElements(
-							Container.class, getLocation(), mapMatrix),
-							Map.getAllAdjacentPoints(Container.class,
-									getLocation(), mapMatrix));
+				if (this.goRoute()) {
+					if (this.usedCapacity < this.capacity)
+						emptyAdjacentContainers(Map.getAllAdjacentElements(
+								Container.class, getLocation(), mapMatrix),
+								Map.getAllAdjacentPoints(Container.class,
+										getLocation(), mapMatrix));
+					//TODO: esvaziar só acima de X???
+					if (emptyInDeposit(Map.getAllAdjacentPoints(Deposit.class,
+							getLocation(), mapMatrix))) {
+						/*
+						 * System.out.println(getAgentName() +
+						 * " emptied the truck at: " + getLocation().x + "|" +
+						 * getLocation().y);
+						 */
+					}
+				}
 				Thread.sleep(tickTime);
 			} catch (InterruptedException e) {
 				System.out.println("Truck thread interrupted, exiting");

@@ -55,16 +55,12 @@ public class FileParser {
 						break;
 					case 'r': // one way road
 						road = new Road(false);
-						if (map.initialLocation == null)
-							map.initialLocation = new Point(x, y);
 						lineList.add(road);
 						map.roads.add(road);
 						map.roadPoints.add(new Point(x, y));
 						break;
 					case 'R': // two way road
 						road = new Road(true);
-						if (map.initialLocation == null)
-							map.initialLocation = new Point(x, y);
 						lineList.add(road);
 						map.roads.add(road);
 						map.roadPoints.add(new Point(x, y));
@@ -95,6 +91,7 @@ public class FileParser {
 						break;
 					case 'D': // deposit
 						lineList.add(deposit);
+						map.depositPoints.add(new Point(x, y));
 						break;
 					default:
 						System.out.println("Character>" + c);

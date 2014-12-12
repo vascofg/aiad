@@ -15,6 +15,7 @@ import elements.Road;
 
 public class TruckInform extends Thread {
 	private boolean go = true;
+	private static final int waitTime = 500;
 	private Truck truck;
 
 	public TruckInform(Truck truck) {
@@ -52,7 +53,7 @@ public class TruckInform extends Thread {
 							+ container.x + " " + container.y + " " + distance);
 					truck.agentController.putO2AObject(sendInformDist, true);
 					try {
-						getInformDist.waitUntilProcessed(Truck.tickTime / 2);
+						getInformDist.waitUntilProcessed(TruckInform.waitTime);
 					} catch (InterruptedException e) {
 						// timeout
 						boolean mineIsCloser = true;
@@ -71,7 +72,7 @@ public class TruckInform extends Thread {
 									}
 								} else
 									System.out
-											.println(getName()
+											.println(truck.getAgentName()
 													+ " got INFORM_DISTANCE for a different container!!!");
 							}
 						} catch (IndexOutOfBoundsException e2) {
@@ -88,8 +89,7 @@ public class TruckInform extends Thread {
 							// //imediato
 							System.out.println(truck.agentName
 									+ " added point to visit: " + toVisit.x
-									+ "|" + toVisit.y + "(distance is "
-									+ distance + ")");
+									+ "|" + toVisit.y);
 						}
 					}
 				} else { // already on my route

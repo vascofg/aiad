@@ -79,8 +79,15 @@ public class WorldAgent extends Agent {
 									t.getLocation(), map.mapMatrix);
 							if (t.getLocation().equals(point)
 									&& (t.getMoveDirection() == moveDir || !road
-											.isTwoWay()))
+											.isTwoWay())) {
 								canMove = false;
+								/*
+								 * System.out.println(args[1] +
+								 * " couldn't move! " + moveDir + "|" +
+								 * t.getMoveDirection() + " Trying to go from "
+								 * + truck.getLocation() + " to " + point);
+								 */
+							}
 						}
 						if (canMove) {
 							sendMsg = new ACLMessage(ACLMessage.CONFIRM);
