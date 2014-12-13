@@ -106,6 +106,21 @@ public class Map {
 		return list;
 	}
 
+	public static void getContainersWithinVision(List<Point> points,
+			List<Container> containers, Point location, int vision,
+			int truckType, ArrayList<ArrayList<MapElement>> mapMatrix) {
+		for (int x = location.x - vision; x < location.x + vision; x++) {
+			for (int y = location.y - vision; y < location.y + vision; y++) {
+				Point p = new Point(x, y);
+				Container c = Map.getElement(Container.class, p, mapMatrix);
+				if (c != null && c.getType() != truckType) {
+					points.add(p);
+					containers.add(c);
+				}
+			}
+		}
+	}
+
 	public static <T extends MapElement> List<T> getAllAdjacentElements(
 			Class<T> clazz, Point location,
 			ArrayList<ArrayList<MapElement>> mapMatrix) {

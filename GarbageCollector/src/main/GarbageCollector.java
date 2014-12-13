@@ -19,6 +19,8 @@ public class GarbageCollector {
 	private static ContainerController containerController;
 	private static JGraphFrame jgraphFrame;
 	public static final Random randGenerator = new Random();
+	// flag (add informed container permanently to the trucks route)
+	public static final boolean addToRoute = true;
 
 	private static ContainerController startJADE() {
 		ContainerController c = jade.core.Runtime.instance()
