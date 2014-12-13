@@ -6,23 +6,26 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.util.Event;
 
 import java.awt.Point;
 
+import elements.trucks.TruckInform;
+
 public class TruckAgent extends Agent {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	protected Event event, gotInformEvent, gotInformDistanceEvent;
+	protected Event event;
 	private AID worldAgent;
 	public static final int REQUEST_CONTAINER_CAPACITY = 1, REQUEST_MOVE = 2,
 			INFORM_OTHER_TRUCKS = 3, INFORM_EMPTIED_CONTAINER = 4,
-			GOT_INFORM_EVENT = 7, INFORM_DISTANCE = 8,
-			GOT_INFORM_DISTANCE_EVENT = 9;
+			GOT_INFORM_EVENT = 7, INFORM_DISTANCE = 8;
+	private TruckInform truckInformThread;
 
 	// método setup
 	@Override
@@ -33,6 +36,7 @@ public class TruckAgent extends Agent {
 		ServiceDescription sd = new ServiceDescription();
 		sd.setName(getName());
 		sd.setType(String.valueOf(this.getArguments()[0]));
+		this.truckInformThread = (TruckInform) this.getArguments()[1];
 		setEnabledO2ACommunication(true, 0);
 		System.out.println("Created TruckAgent " + getName() + " with type: "
 				+ sd.getType());
@@ -64,22 +68,19 @@ public class TruckAgent extends Agent {
 					int requestType = Integer.parseInt(args[0]);
 					switch (requestType) {
 					case TruckAgent.INFORM_DISTANCE:
-						int[] param = { Integer.parseInt(args[1]),
-								Integer.parseInt(args[2]),
-								Integer.parseInt(args[3]) };
-						if (myTruckAgent.gotInformDistanceEvent != null)
-							myTruckAgent.gotInformDistanceEvent
-									.addParameter(param);
+						synchronized (myTruckAgent.truckInformThread) {
+							myTruckAgent.truckInformThread.gotDistance(
+									new Point(Integer.parseInt(args[1]),
+											Integer.parseInt(args[2])), Integer
+											.parseInt(args[3]));
+						}
 						break;
 					case TruckAgent.INFORM_OTHER_TRUCKS:
-						/*
-						 * System.out.println(myAgent.getName() +
-						 * " got INFORM from " + msg.getSender().getName() +
-						 * ": " + msg.getContent());
-						 */
-						myTruckAgent.gotInformEvent.notifyProcessed(new Point(
-								Integer.parseInt(args[1]), Integer
-										.parseInt(args[2])));
+						synchronized (myTruckAgent.truckInformThread) {
+							myTruckAgent.truckInformThread.gotInform(new Point(
+									Integer.parseInt(args[1]), Integer
+											.parseInt(args[2])));
+						}
 						break;
 					case WorldAgent.INFORM_CONTAINER_CAPACITY:
 						Point expectedContainer = (Point) event.getParameter(1);
@@ -133,9 +134,9 @@ public class TruckAgent extends Agent {
 						switch (event.getType()) {
 						case TruckAgent.INFORM_DISTANCE:
 							msg = new ACLMessage(ACLMessage.INFORM);
-							findTrucksByType(args[0], msg);
-							toSend = event.getType() + " " + args[1] + " "
-									+ args[2] + " " + args[3];
+							if (findTrucksByType(args[0], msg))
+								toSend = event.getType() + " " + args[1] + " "
+										+ args[2] + " " + args[3];
 							break;
 						case TruckAgent.REQUEST_CONTAINER_CAPACITY:
 							myTruckAgent.event = event;
@@ -149,10 +150,10 @@ public class TruckAgent extends Agent {
 							// pesquisa DF por agentes do tipo de lixo
 							// respectivo
 							msg = new ACLMessage(ACLMessage.INFORM);
-							findTrucksByType(args[0], msg);
-							// INFORM_TYPE + X + Y
-							toSend = event.getType() + " " + args[1] + " "
-									+ args[2];
+							if (findTrucksByType(args[0], msg))
+								// INFORM_TYPE + X + Y
+								toSend = event.getType() + " " + args[1] + " "
+										+ args[2];
 							break;
 						case TruckAgent.REQUEST_MOVE:
 							myTruckAgent.event = event;
@@ -176,23 +177,14 @@ public class TruckAgent extends Agent {
 							return;
 
 						}
-						msg.setContent(toSend);
-						send(msg);
-					} catch (IndexOutOfBoundsException e) {
-						if (event.getType() == TruckAgent.GOT_INFORM_EVENT) { // regista
-							// evento
-							// (espera
-							// por
-							// informs)
-							myTruckAgent.gotInformEvent = event;
-							return;
-						} else if (event.getType() == TruckAgent.GOT_INFORM_DISTANCE_EVENT) {
-							myTruckAgent.gotInformDistanceEvent = event;
-							return;
-						} else {
-							e.printStackTrace();
-							return;
+						if (toSend != null) {
+							msg.setContent(toSend);
+							send(msg);
 						}
+					} catch (IndexOutOfBoundsException e) {
+						System.out.println("(TruckAgent) INVALID ARGUMENTS");
+						e.printStackTrace();
+						return;
 					}
 				} else {
 					block();
@@ -214,22 +206,30 @@ public class TruckAgent extends Agent {
 	}
 
 	// não retorna o próprio
-	private void findTrucksByType(String type, ACLMessage msg) {
+	private boolean findTrucksByType(String type, ACLMessage msg) {
 		try {
 			DFAgentDescription template = new DFAgentDescription();
 			ServiceDescription sd1 = new ServiceDescription();
 			sd1.setType(type);
 			template.addServices(sd1);
 			DFAgentDescription[] result;
-			result = DFService.search(this, template);
-			for (int i = 0; i < result.length; ++i) {
-				// dont send messages to self
-				if (!this.getAID().equals(result[i].getName()))
-					msg.addReceiver(result[i].getName());
+			result = DFService.searchUntilFound(this, this.getDefaultDF(),
+					template, new SearchConstraints(), 100);
+			if (result != null) {
+				// result = DFService.search(this, template);
+				for (int i = 0; i < result.length; ++i) {
+					// dont send messages to self
+					if (!this.getAID().equals(result[i].getName()))
+						msg.addReceiver(result[i].getName());
+				}
+				return true;
+			} else {
+				System.out.println("DF SEARCH TIMED OUT!");
 			}
 		} catch (FIPAException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return false;
 	}
 }

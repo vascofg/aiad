@@ -9,6 +9,7 @@ import jade.wrapper.StaleProxyException;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import main.GarbageCollector;
@@ -32,20 +33,22 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	Point currentLocation;
 
-	private Point currentDestination;
+	Point currentDestination;
 	ArrayList<Point> pointsToVisit;
 	private int pointIndex, moveDirection;
 	private ArrayList<DefaultEdge> currentDestinationRoute;
 	private HashMap<ArrayList<Point>, List<DefaultEdge>> routes;
+	private LinkedList<Container> alreadyInformedContainers;
 	ArrayList<ArrayList<MapElement>> mapMatrix;
 	String agentName;
 	public AgentController agentController;
 	private int capacity, usedCapacity;
-	Event gotInformEvent;
-	private Thread waitInformThread;
+	private TruckInform waitInformThread;
 
 	private boolean go = true;
-	private static final int tickTime = 50; // in ms
+	static final int tickTime = 50; // in ms
+	static final int waitTime = 500;
+	private static final int vision = 3;
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -56,8 +59,11 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.capacity = capacity;
 		this.usedCapacity = 0;
 		this.mapMatrix = Map.cloneMapMatrix(matrix);
+		this.waitInformThread = new TruckInform(this);
+		this.waitInformThread.start();
 		this.agentController = containerController.createNewAgent(name,
-				TruckAgent.class.getName(), new Object[] { agentType });
+				TruckAgent.class.getName(), new Object[] { agentType,
+						this.waitInformThread });
 		this.agentController.start();
 		// wait until agent is started
 		while (agentController.getState().getCode() != AgentState.cAGENT_STATE_IDLE) {
@@ -68,11 +74,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 				e.printStackTrace();
 			}
 		}
-		this.gotInformEvent = new Event(TruckAgent.GOT_INFORM_EVENT, this);
-		this.agentController.putO2AObject(this.gotInformEvent, true);
 		this.agentName = name;
-		this.waitInformThread = new TruckInform(this);
-		this.waitInformThread.start();
+		this.alreadyInformedContainers = new LinkedList<Container>();
 	}
 
 	public String getAgentName() {
@@ -118,11 +121,11 @@ public abstract class Truck extends Thread implements DrawableElement {
 			for (int i = 0; i < adjacentContainers.size(); i++) {
 				Container c = adjacentContainers.get(i);
 				Point p = adjacentContainerPoints.get(i);
-				if (c.truckCompatible(this)) {
+				if (c.truckCompatible(this)
+						&& this.usedCapacity < this.capacity) {
 					if (containerRequest(p.x, p.y))
 						emptiedAny = true;
-				} else
-					containerInform(c.getType(), p.x, p.y);
+				}
 
 			}
 		} catch (StaleProxyException | InterruptedException e) {
@@ -144,13 +147,13 @@ public abstract class Truck extends Thread implements DrawableElement {
 			throws StaleProxyException {
 		Event event = new Event(TruckAgent.INFORM_OTHER_TRUCKS, this);
 		event.addParameter(new String(garbageType + " " + X + " " + Y));
-		this.agentController.putO2AObject(event, false);
+		this.agentController.putO2AObject(event, true);
 	}
 
 	public void emptiedContainerInform(int X, int Y) throws StaleProxyException {
 		Event event = new Event(TruckAgent.INFORM_EMPTIED_CONTAINER, this);
 		event.addParameter(new String(X + " " + Y));
-		this.agentController.putO2AObject(event, false);
+		this.agentController.putO2AObject(event, true);
 	}
 
 	public boolean containerRequest(int X, int Y) throws StaleProxyException,
@@ -158,7 +161,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 		Event event = new Event(TruckAgent.REQUEST_CONTAINER_CAPACITY, this);
 		event.addParameter(new String(X + " " + Y));
 		event.addParameter(new Point(X, Y));
-		this.agentController.putO2AObject(event, false);
+		this.agentController.putO2AObject(event, true);
 
 		int usedContainerCapacity = (int) event.waitUntilProcessed();
 		if (usedContainerCapacity > 0) {
@@ -203,17 +206,21 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return closestDeposit;
 	}
 
-	public boolean moveRequest(Point destination) throws StaleProxyException,
-			InterruptedException {
+	public boolean moveRequest(Point destination) throws StaleProxyException {
 		Event event = new Event(TruckAgent.REQUEST_MOVE, this);
 		event.addParameter(new String(this.agentName + " " + destination.x
 				+ " " + destination.y + " "
 				+ Assets.getMoveDirection(this.getLocation(), destination)));
-		this.agentController.putO2AObject(event, false);
+		this.agentController.putO2AObject(event, true);
 
-		boolean result = (boolean) event.waitUntilProcessed(); // TODO:
-																// acrescentar
-																// timeout?
+		boolean result;
+		try {
+			result = (boolean) event.waitUntilProcessed(Truck.waitTime);
+		} catch (InterruptedException e) {
+			System.out.println(getAgentName() + " move request timed out!");
+			result = false;
+		}
+
 		if (result)
 			moveTruck(destination);
 
@@ -225,7 +232,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 		try {
 			return moveRequest(possibleMoves.get(GarbageCollector.randGenerator
 					.nextInt(possibleMoves.size())));
-		} catch (StaleProxyException | InterruptedException e) {
+		} catch (StaleProxyException e) {
 			e.printStackTrace();
 		}
 		return false;
@@ -273,15 +280,24 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	@Override
 	public void run() {
+		int countVision = 0;
 		while (go) {
 			try {
+				// System.out.println(getAgentName() + " tick!");
 				if (this.goRoute()) {
-					if (this.usedCapacity < this.capacity)
-						emptyAdjacentContainers(Map.getAllAdjacentElements(
-								Container.class, getLocation(), mapMatrix),
-								Map.getAllAdjacentPoints(Container.class,
-										getLocation(), mapMatrix));
-					//TODO: esvaziar só acima de X???
+					countVision++;
+					emptyAdjacentContainers(Map.getAllAdjacentElements(
+							Container.class, getLocation(), mapMatrix),
+							Map.getAllAdjacentPoints(Container.class,
+									getLocation(), mapMatrix));
+
+					if (countVision == Truck.vision) { // evita spam // de //
+						// mensagens // inform
+						informContainersInVision();
+						countVision = 0;
+					}
+
+					// TODO: esvaziar só acima de X???
 					if (emptyInDeposit(Map.getAllAdjacentPoints(Deposit.class,
 							getLocation(), mapMatrix))) {
 						/*
@@ -297,6 +313,26 @@ public abstract class Truck extends Thread implements DrawableElement {
 			} catch (StaleProxyException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void informContainersInVision() throws StaleProxyException {
+		ArrayList<Point> points = new ArrayList<Point>();
+		ArrayList<Container> containers = new ArrayList<Container>();
+
+		Map.getContainersWithinVision(points, containers, this.getLocation(),
+				Truck.vision, this.getType(), mapMatrix);
+		for (int i = 0; i < points.size(); i++) {
+			Point p = points.get(i);
+			Container c = containers.get(i);
+			if (GarbageCollector.addToRoute) {
+				if (!this.alreadyInformedContainers.contains(c)) {
+					containerInform(c.getType(), p.x, p.y);
+					this.alreadyInformedContainers.add(c);
+				}
+
+			} else
+				containerInform(c.getType(), p.x, p.y);
 		}
 	}
 

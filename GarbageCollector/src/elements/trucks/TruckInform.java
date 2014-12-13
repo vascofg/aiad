@@ -4,8 +4,10 @@ import jade.util.Event;
 import jade.wrapper.StaleProxyException;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
 
+import main.GarbageCollector;
 import map.Map;
 
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -15,89 +17,95 @@ import elements.Road;
 
 public class TruckInform extends Thread {
 	private boolean go = true;
-	private static final int waitTime = 500;
 	private Truck truck;
+	private Point container;
+	private ArrayList<Integer> distances;
 
 	public TruckInform(Truck truck) {
 		super(truck.agentName + " inform");
 		this.truck = truck;
+		this.container = null;
+		this.distances = new ArrayList<Integer>();
+	}
+
+	public synchronized void gotInform(Point container) {
+		if (this.container == null)
+			this.container = container;
+		else
+			System.out.println(truck.getAgentName()
+					+ " currently processing another container!");
+	}
+
+	public synchronized void gotDistance(Point container, int distance) {
+		if (this.container != null) {
+			if (container.equals(this.container)) {
+				this.distances.add(distance);
+			} else {
+				System.out.println(truck.getAgentName()
+						+ " got INFORM_DISTANCE for a different container!!!");
+			}
+		}
 	}
 
 	@Override
 	public void run() {
 		try {
 			while (go) {
-				Point container = (Point) truck.gotInformEvent
-						.waitUntilProcessed();
-				// TODO: processo de decisão (qual dos trucks vai lá)
-				List<Point> adjacentRoads = Map.getAllAdjacentPoints(
-						Road.class, container, truck.mapMatrix);
-				boolean contains = false;
-				for (Point road : adjacentRoads)
-					if (truck.pointsToVisit.contains(road)) {
-						contains = true;
-						break;
-					}
-				Event sendInformDist = new Event(TruckAgent.INFORM_DISTANCE,
-						this);
-				if (!contains) {
-					// TODO: optimizar qual das estradas escolher
-					Point toVisit = adjacentRoads.get(0);
-					int distance = DijkstraShortestPath.findPathBetween(
-							Map.INSTANCE.graph, truck.currentLocation, toVisit)
-							.size();
-					Event getInformDist = new Event(
-							TruckAgent.GOT_INFORM_DISTANCE_EVENT, this);
-					truck.agentController.putO2AObject(getInformDist, true);
-					sendInformDist.addParameter(truck.getType() + " "
-							+ container.x + " " + container.y + " " + distance);
-					truck.agentController.putO2AObject(sendInformDist, true);
-					try {
-						getInformDist.waitUntilProcessed(TruckInform.waitTime);
-					} catch (InterruptedException e) {
-						// timeout
-						boolean mineIsCloser = true;
-						try {
-							int[] parameter;
-							for (int i = 0; i < Integer.MAX_VALUE; i++) {
-								parameter = (int[]) getInformDist
-										.getParameter(i);
-								Point receivedContainer = new Point(
-										parameter[0], parameter[1]);
-								if (receivedContainer.equals(container)) {
-									int theirDistance = parameter[2];
-									if (theirDistance < distance) {
-										mineIsCloser = false;
-										break;
-									}
-								} else
-									System.out
-											.println(truck.getAgentName()
-													+ " got INFORM_DISTANCE for a different container!!!");
-							}
-						} catch (IndexOutOfBoundsException e2) {
-							// acabou, n faz nada
+				if (container != null) {
+					// processo de decisão (qual dos trucks vai lá)
+					List<Point> adjacentRoads = Map.getAllAdjacentPoints(
+							Road.class, container, truck.mapMatrix);
+					boolean contains = false;
+					for (Point road : adjacentRoads)
+						if (truck.pointsToVisit.contains(road)) {
+							contains = true;
+							break;
 						}
+					Event sendInformDist = new Event(
+							TruckAgent.INFORM_DISTANCE, this);
+					if (!contains) {
+						// TODO: optimizar qual das estradas escolher
+						Point toVisit = adjacentRoads.get(0);
+						int distance = DijkstraShortestPath.findPathBetween(
+								Map.INSTANCE.graph, truck.currentLocation,
+								toVisit).size();
+						sendInformDist.addParameter(truck.getType() + " "
+								+ container.x + " " + container.y + " "
+								+ distance);
+						truck.agentController
+								.putO2AObject(sendInformDist, true);
+						Thread.sleep(Truck.waitTime);
+						// Make a copy
+						ArrayList<Integer> distances = new ArrayList<Integer>(
+								this.distances);
+						boolean mineIsCloser = true;
+						for (int receivedDistance : distances) {
+							if (receivedDistance < distance) {
+								mineIsCloser = false;
+								break;
+							}
+						}
+
 						if (mineIsCloser) {
 							// TODO: interface para opções
-							truck.pointsToVisit.add(toVisit); // permanente
-							// (no final
-							// da
-							// rota
-							// actual)
-							// currentDestination = toVisit;
-							// //imediato
+							if (GarbageCollector.addToRoute)
+								truck.pointsToVisit.add(toVisit); // permanente
+							else
+								truck.currentDestination = toVisit;
 							System.out.println(truck.agentName
 									+ " added point to visit: " + toVisit.x
 									+ "|" + toVisit.y);
 						}
+					} else { // already on my route
+						sendInformDist.addParameter(truck.getType() + " "
+								+ container.x + " " + container.y + " -1");
+						truck.agentController.putO2AObject(sendInformDist,
+								false);
 					}
-				} else { // already on my route
-					sendInformDist.addParameter(truck.getType() + " "
-							+ container.x + " " + container.y + " -1");
-					truck.agentController.putO2AObject(sendInformDist, false);
+					this.container = null;
+					this.distances.clear();
 				}
-				truck.gotInformEvent.reset();
+				Thread.sleep(Truck.tickTime);
 			}
 		} catch (InterruptedException e) {
 			System.out.println("Inform thread interrupted!");
