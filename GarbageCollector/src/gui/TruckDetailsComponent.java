@@ -16,7 +16,7 @@ public class TruckDetailsComponent extends JPanel{
         else
             this.currentDestination = new JLabel("<html>None yet</html>");
 
-        this.currentUsage = new JLabel("<html>" + Integer.toString(truck.getUsedCapacity()) + "/" + truck.getCapacity() + "</html>");
+        this.currentUsage = new JLabel("<html>" + Integer.toString(truck.getUsedCapacity()) + " / " + truck.getCapacity() + "</html>");
 
         switch (truck.getType()) {
             case 0:
@@ -55,7 +55,7 @@ public class TruckDetailsComponent extends JPanel{
     }
 
     public void setCurrentUsage(Truck truck) {
-        this.currentUsage.setText("<html>" + Integer.toString(truck.getUsedCapacity()) + "/" + truck.getCapacity() + "</html>");
+        this.currentUsage.setText("<html>" + Integer.toString(truck.getUsedCapacity()) + " / " + truck.getCapacity() + "</html>");
         this.currentUsage.repaint();
     }
 }

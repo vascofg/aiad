@@ -11,39 +11,39 @@ import java.awt.*;
 import java.util.ArrayList;
 
 
-public class Menu extends JFrame {
-
+public class Menu extends JPanel {
+    private GridBagConstraints c = new GridBagConstraints();
     public Menu() {
 
         this.setLayout(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
 
         TitledBorder title = BorderFactory.createTitledBorder("Truck Details");
 
-        JComponent content = (JComponent)this.getContentPane();
-        content.setBorder(title);
+        this.setBorder(title);
 
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 0.5;
+        c.weightx = 1;
 
-        this.add(new JLabel("     "));
+        c.insets = new Insets(5, 10, 5, 10);
+        c.gridx = 0;
         this.add(new JLabel("List Of Trucks"), c);
+        c.gridx = 1;
         this.add(new JLabel("Current Destination"), c);
+        c.gridx = 2;
         this.add(new JLabel("Current Garbage Amount"), c);
 
-        c.gridx = 1;
-        c.gridy = 0;
+        this.setPreferredSize(new Dimension(400,300));
+    }
+
+    public void addTrucks(ArrayList<Truck> trucks) {
+        c.gridx = 0;
+        c.gridy = 1;
         c.gridwidth = 3;
-        ArrayList<Truck> trucks = Map.INSTANCE.trucks;
 
         for (int i = 0; i < trucks.size(); i++) {
             c.gridy++;
-            System.out.println("AAAA" + trucks.get(i).getAgentName());
-            this.add(trucks.get(i).getComponent(), c);
-            //this.add(new TruckDetailsComponent(trucks.get(i)), c);
+            this.add(trucks.get(i).getComponent(),c);
         }
 
-        this.setSize(400, 300);
-        setVisible(true);
     }
 }
