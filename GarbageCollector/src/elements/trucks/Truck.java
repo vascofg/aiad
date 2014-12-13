@@ -76,6 +76,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 				e.printStackTrace();
 			}
 		}
+		this.alreadyInformedContainers = new LinkedList<Container>();
 		this.agentName = name;
         this.component = new TruckDetailsComponent(this);
 	}
