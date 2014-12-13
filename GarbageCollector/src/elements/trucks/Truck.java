@@ -1,5 +1,6 @@
 package elements.trucks;
 
+import gui.TruckDetailsComponent;
 import jade.util.Event;
 import jade.wrapper.AgentController;
 import jade.wrapper.AgentState;
@@ -43,6 +44,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	private int capacity, usedCapacity;
 	Event gotInformEvent;
 	private Thread waitInformThread;
+    TruckDetailsComponent component;
 
 	private boolean go = true;
 	private static final int tickTime = 50; // in ms
@@ -71,11 +73,16 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.gotInformEvent = new Event(TruckAgent.GOT_INFORM_EVENT, this);
 		this.agentController.putO2AObject(this.gotInformEvent, true);
 		this.agentName = name;
+        this.component = new TruckDetailsComponent(this);
 		this.waitInformThread = new TruckInform(this);
 		this.waitInformThread.start();
 	}
 
-	public String getAgentName() {
+    public TruckDetailsComponent getComponent() {
+        return component;
+    }
+
+    public String getAgentName() {
 		return agentName;
 	}
 
@@ -88,12 +95,17 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void addToTruck(int ammount) throws TruckFullException {
 		if ((this.usedCapacity + ammount) > this.capacity)
 			throw new TruckFullException();
-		else
-			this.usedCapacity += ammount;
+		else {
+            this.usedCapacity += ammount;
+            this.component.setCurrentUsage(this);
+        }
+
+
 	}
 
 	public void emptyTruck() {
 		this.usedCapacity = 0;
+        this.component.setCurrentUsage(this);
 	}
 
 	public void moveTruck(Point destination) {
@@ -132,7 +144,19 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return emptiedAny;
 	}
 
-	public boolean emptyInDeposit(List<Point> adjacentDeposits) {
+    public Point getCurrentDestination() {
+        return currentDestination;
+    }
+
+    public int getUsedCapacity() {
+        return usedCapacity;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public boolean emptyInDeposit(List<Point> adjacentDeposits) {
 		if (adjacentDeposits.size() > 0) {
 			this.emptyTruck();
 			return true;
@@ -171,6 +195,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 			} catch (TruckFullException e) {
 				containerInform(this.getType(), X, Y);
 				this.currentDestination = getClosestDeposit();
+                this.component.setCurrentDestination(this);
 				System.out.println(getAgentName() + " is full, going to "
 						+ this.currentDestination.x + "|"
 						+ this.currentDestination.y + " to empty...");
@@ -236,8 +261,10 @@ public abstract class Truck extends Thread implements DrawableElement {
 			return false;
 		if (pointIndex == pointsToVisit.size())
 			pointIndex = 0; // TODO: ESTRATEGIAS
-		if (currentDestination == null)
-			currentDestination = pointsToVisit.get(pointIndex);
+		if (currentDestination == null) {
+            currentDestination = pointsToVisit.get(pointIndex);
+            this.component.setCurrentDestination(this);
+        }
 		if (currentDestinationRoute.isEmpty()) {
 			ArrayList<Point> points = new ArrayList<Point>(2);
 			points.add(currentLocation);

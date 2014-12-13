@@ -3,6 +3,7 @@ package main;
 import files.FileParser;
 import gui.JGraphFrame;
 import gui.MapJFrame;
+import gui.Menu;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
 
@@ -42,10 +43,12 @@ public class GarbageCollector {
 			@Override
 			public void run() {
 				frame = new MapJFrame("Garbage Collector");
+
 				// jgraphFrame = new JGraphFrame(Map.INSTANCE.graph);
 				containerThread = new ContainerThread();
 				containerThread.start();
 				Map.INSTANCE.initTrucks(containerController);
+                new Menu();
 				frame.mapComponent.repaint(); // repaint all after initing
 												// trucks
 			}
