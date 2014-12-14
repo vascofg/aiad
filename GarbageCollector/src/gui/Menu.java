@@ -1,49 +1,57 @@
 package gui;
 
-import elements.trucks.Truck;
-import map.Map;
-
-import javax.swing.*;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
+
+import elements.trucks.Truck;
 
 public class Menu extends JPanel {
-    private GridBagConstraints c = new GridBagConstraints();
-    public Menu() {
+	private static final long serialVersionUID = 1L;
+	private GridBagConstraints c = new GridBagConstraints();
+	private JPanel container;
 
-        this.setLayout(new GridBagLayout());
+	public Menu() {
 
-        TitledBorder title = BorderFactory.createTitledBorder("Truck Details");
+		// this.setLayout(new GridBagLayout());
 
-        this.setBorder(title);
+		TitledBorder title = BorderFactory.createTitledBorder("Truck Details");
 
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 1;
+		this.setBorder(title);
 
-        c.insets = new Insets(5, 10, 5, 10);
-        c.gridx = 0;
-        this.add(new JLabel("List Of Trucks"), c);
-        c.gridx = 1;
-        this.add(new JLabel("Current Destination"), c);
-        c.gridx = 2;
-        this.add(new JLabel("Current Garbage Amount"), c);
+		container = new JPanel(new GridBagLayout());
 
-        this.setPreferredSize(new Dimension(400,300));
-    }
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.NORTH;
+		c.weighty = 1;
+		c.weightx = 1;
 
-    public void addTrucks(ArrayList<Truck> trucks) {
-        c.gridx = 0;
-        c.gridy = 1;
-        c.gridwidth = 3;
+		c.insets = new Insets(5, 10, 5, 10);
+		c.gridx = 0;
+		container.add(new JLabel("List Of Trucks"), c);
+		c.gridx = 1;
+		container.add(new JLabel("Current Destination"), c);
+		c.gridx = 2;
+		container.add(new JLabel("Current Garbage Amount"), c);
+		this.add(container, BorderLayout.NORTH);
+	}
 
-        for (int i = 0; i < trucks.size(); i++) {
-            c.gridy++;
-            this.add(trucks.get(i).getComponent(),c);
-        }
+	public void addTrucks(ArrayList<Truck> trucks) {
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 3;
 
-    }
+		for (int i = 0; i < trucks.size(); i++) {
+			c.gridy++;
+			container.add(trucks.get(i).getComponent(), c);
+		}
+		this.add(container, BorderLayout.NORTH);
+	}
 }

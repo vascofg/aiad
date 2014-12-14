@@ -3,7 +3,6 @@ package main;
 import files.FileParser;
 import gui.JGraphFrame;
 import gui.MapJFrame;
-import gui.Menu;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
 
@@ -21,7 +20,7 @@ public class GarbageCollector {
 	public static final Random randGenerator = new Random();
 	// flag (add informed container permanently to the trucks route)
 	public static final boolean addToRoute = true;
-	
+
 	private static ContainerController startJADE() {
 		ContainerController c = jade.core.Runtime.instance()
 				.createMainContainer(new ProfileImpl(true));
@@ -45,9 +44,9 @@ public class GarbageCollector {
 			@Override
 			public void run() {
 				frame = new MapJFrame("Garbage Collector");
-                Map.INSTANCE.initTrucks(containerController);
-                frame.menu.addTrucks(Map.INSTANCE.trucks);
-                frame.pack();
+				Map.INSTANCE.initTrucks(containerController);
+				frame.menu.addTrucks(Map.INSTANCE.trucks);
+				frame.pack();
 				// jgraphFrame = new JGraphFrame(Map.INSTANCE.graph);
 				containerThread = new ContainerThread();
 				containerThread.start();

@@ -1,6 +1,5 @@
 package elements.trucks;
 
-import gui.TruckDetailsComponent;
 import jade.util.Event;
 import jade.wrapper.AgentController;
 import jade.wrapper.AgentState;
@@ -27,6 +26,7 @@ import elements.MapElement;
 import elements.Road;
 import elements.containers.Container;
 import exceptions.TruckFullException;
+import gui.TruckDetailsComponent;
 
 public abstract class Truck extends Thread implements DrawableElement {
 
@@ -44,14 +44,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 	String agentName;
 	public AgentController agentController;
 	private int capacity, usedCapacity;
-    TruckDetailsComponent component;
+	TruckDetailsComponent component;
 	private TruckInform waitInformThread;
 	boolean goingToDeposit = false;
 
 	private boolean go = true;
 	static final int tickTime = 150; // in ms
 	static final int waitTime = 500;
-	private static final int vision = 10;
+	private static final int vision = 4;
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -79,14 +79,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 		}
 		this.alreadyInformedContainers = new LinkedList<Container>();
 		this.agentName = name;
-        this.component = new TruckDetailsComponent(this);
+		this.component = new TruckDetailsComponent(this);
 	}
 
-    public TruckDetailsComponent getComponent() {
-        return component;
-    }
+	public TruckDetailsComponent getComponent() {
+		return component;
+	}
 
-    public String getAgentName() {
+	public String getAgentName() {
 		return agentName;
 	}
 
@@ -100,16 +100,15 @@ public abstract class Truck extends Thread implements DrawableElement {
 		if ((this.usedCapacity + ammount) > this.capacity)
 			throw new TruckFullException();
 		else {
-            this.usedCapacity += ammount;
-            this.component.setCurrentUsage(this);
-        }
-
+			this.usedCapacity += ammount;
+			this.component.setCurrentUsage(this);
+		}
 
 	}
 
 	public void emptyTruck() {
 		this.usedCapacity = 0;
-        this.component.setCurrentUsage(this);
+		this.component.setCurrentUsage(this);
 	}
 
 	public void moveTruck(Point destination) {
@@ -148,21 +147,22 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return emptiedAny;
 	}
 
-    public Point getCurrentDestination() {
-        return currentDestination;
-    }
+	public Point getCurrentDestination() {
+		return currentDestination;
+	}
 
-    public int getUsedCapacity() {
-        return usedCapacity;
-    }
+	public int getUsedCapacity() {
+		return usedCapacity;
+	}
 
-    public int getCapacity() {
-        return capacity;
-    }
+	public int getCapacity() {
+		return capacity;
+	}
 
-    public boolean emptyInDeposit(List<Point> adjacentDeposits) {
+	public boolean emptyInDeposit(List<Point> adjacentDeposits) {
 		if (adjacentDeposits.size() > 0) {
 			this.emptyTruck();
+			this.goingToDeposit = false;
 			return true;
 		}
 		return false;
@@ -202,7 +202,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 				containerInform(this.getType(), X, Y);
 				this.currentDestination = getClosestDeposit();
 				goToClosestDeposit(X, Y);
-                this.component.setCurrentDestination(this);
+				this.component.setCurrentDestination(this);
 				System.out.println(getAgentName() + " is full, going to "
 						+ this.currentDestination.x + "|"
 						+ this.currentDestination.y + " to empty...");
@@ -273,9 +273,9 @@ public abstract class Truck extends Thread implements DrawableElement {
 		if (pointIndex == pointsToVisit.size())
 			pointIndex = 0; // TODO: ESTRATEGIAS
 		if (currentDestination == null) {
-            currentDestination = pointsToVisit.get(pointIndex);
-            this.component.setCurrentDestination(this);
-        }
+			currentDestination = pointsToVisit.get(pointIndex);
+			this.component.setCurrentDestination(this);
+		}
 		if (currentDestinationRoute.isEmpty()) {
 			ArrayList<Point> points = new ArrayList<Point>(2);
 			points.add(currentLocation);
@@ -380,7 +380,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public void setMoveDirection(int moveDirection) {
 		this.moveDirection = moveDirection;
 	}
-	
+
 	private void goToClosestDeposit(int X, int Y) throws StaleProxyException {
 		containerInform(this.getType(), X, Y);
 		this.currentDestination = getClosestDeposit();

@@ -31,19 +31,19 @@ public class TruckInform extends Thread {
 	public synchronized void gotInform(Point container) {
 		if (this.container == null)
 			this.container = container;
-		else
-			System.out.println(truck.getAgentName()
-					+ " currently processing another container!");
+		// else
+		// System.out.println(truck.getAgentName()
+		// + " currently processing another container!");
 	}
 
 	public synchronized void gotDistance(Point container, int distance) {
 		if (this.container != null) {
 			if (container.equals(this.container)) {
 				this.distances.add(distance);
-			} else {
-				System.out.println(truck.getAgentName()
-						+ " got INFORM_DISTANCE for a different container!!!");
-			}
+			}// else {
+				// System.out.println(truck.getAgentName()
+				// + " got INFORM_DISTANCE for a different container!!!");
+				// }
 		}
 	}
 
@@ -72,8 +72,8 @@ public class TruckInform extends Thread {
 						sendInformDist.addParameter(truck.getType() + " "
 								+ container.x + " " + container.y + " "
 								+ distance);
-						truck.agentController
-								.putO2AObject(sendInformDist, false);
+						truck.agentController.putO2AObject(sendInformDist,
+								false);
 						Thread.sleep(Truck.waitTime);
 						// Make a copy
 						ArrayList<Integer> distances = new ArrayList<Integer>(
@@ -90,7 +90,7 @@ public class TruckInform extends Thread {
 							// TODO: interface para opções
 							if (GarbageCollector.addToRoute)
 								truck.pointsToVisit.add(toVisit); // permanente
-							else if(!truck.goingToDeposit)
+							else if (!truck.goingToDeposit)
 								truck.currentDestination = toVisit;
 							System.out.println(truck.agentName
 									+ " added point to visit: " + toVisit.x

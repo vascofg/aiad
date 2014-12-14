@@ -1,6 +1,7 @@
 package gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
@@ -15,7 +16,7 @@ public class MapJFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	public Dimension mapDim;
 	public MapJComponent mapComponent;
-    public Menu menu;
+	public Menu menu;
 
 	public MapJFrame(String title) {
 		super(title);
@@ -27,11 +28,12 @@ public class MapJFrame extends JFrame {
 
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        menu = new Menu();
+		menu = new Menu();
+		menu.setPreferredSize(new Dimension(400, mapDim.height));
 		mapComponent = new MapJComponent(map);
 		mapComponent.setPreferredSize(mapDim);
 		this.getContentPane().add(mapComponent);
-        this.getContentPane().add(menu, BorderLayout.EAST);
+		this.getContentPane().add(menu, BorderLayout.EAST);
 
 		this.setResizable(false);
 		// Display the window.
