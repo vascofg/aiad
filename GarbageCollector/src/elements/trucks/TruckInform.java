@@ -73,7 +73,7 @@ public class TruckInform extends Thread {
 								+ container.x + " " + container.y + " "
 								+ distance);
 						truck.agentController
-								.putO2AObject(sendInformDist, true);
+								.putO2AObject(sendInformDist, false);
 						Thread.sleep(Truck.waitTime);
 						// Make a copy
 						ArrayList<Integer> distances = new ArrayList<Integer>(
@@ -90,7 +90,7 @@ public class TruckInform extends Thread {
 							// TODO: interface para opções
 							if (GarbageCollector.addToRoute)
 								truck.pointsToVisit.add(toVisit); // permanente
-							else
+							else if(!truck.goingToDeposit)
 								truck.currentDestination = toVisit;
 							System.out.println(truck.agentName
 									+ " added point to visit: " + toVisit.x

@@ -46,11 +46,12 @@ public abstract class Truck extends Thread implements DrawableElement {
 	private int capacity, usedCapacity;
     TruckDetailsComponent component;
 	private TruckInform waitInformThread;
+	boolean goingToDeposit = false;
 
 	private boolean go = true;
-	static final int tickTime = 50; // in ms
+	static final int tickTime = 150; // in ms
 	static final int waitTime = 500;
-	private static final int vision = 3;
+	private static final int vision = 10;
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -171,13 +172,13 @@ public abstract class Truck extends Thread implements DrawableElement {
 			throws StaleProxyException {
 		Event event = new Event(TruckAgent.INFORM_OTHER_TRUCKS, this);
 		event.addParameter(new String(garbageType + " " + X + " " + Y));
-		this.agentController.putO2AObject(event, true);
+		this.agentController.putO2AObject(event, false);
 	}
 
 	public void emptiedContainerInform(int X, int Y) throws StaleProxyException {
 		Event event = new Event(TruckAgent.INFORM_EMPTIED_CONTAINER, this);
 		event.addParameter(new String(X + " " + Y));
-		this.agentController.putO2AObject(event, true);
+		this.agentController.putO2AObject(event, false);
 	}
 
 	public boolean containerRequest(int X, int Y) throws StaleProxyException,
@@ -185,19 +186,22 @@ public abstract class Truck extends Thread implements DrawableElement {
 		Event event = new Event(TruckAgent.REQUEST_CONTAINER_CAPACITY, this);
 		event.addParameter(new String(X + " " + Y));
 		event.addParameter(new Point(X, Y));
-		this.agentController.putO2AObject(event, true);
+		this.agentController.putO2AObject(event, false);
 
 		int usedContainerCapacity = (int) event.waitUntilProcessed();
 		if (usedContainerCapacity > 0) {
 			try {
 				this.addToTruck(usedContainerCapacity);
 				emptiedContainerInform(X, Y);
+				if (this.usedCapacity == this.capacity)
+					goToClosestDeposit(X, Y);
 				return true;
 				// TODO: esvaziar o que puder (tem de avisar mundo)
 				// TODO: ir esvaziar quando acima de x capacidade usada
 			} catch (TruckFullException e) {
 				containerInform(this.getType(), X, Y);
 				this.currentDestination = getClosestDeposit();
+				goToClosestDeposit(X, Y);
                 this.component.setCurrentDestination(this);
 				System.out.println(getAgentName() + " is full, going to "
 						+ this.currentDestination.x + "|"
@@ -236,7 +240,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 		event.addParameter(new String(this.agentName + " " + destination.x
 				+ " " + destination.y + " "
 				+ Assets.getMoveDirection(this.getLocation(), destination)));
-		this.agentController.putO2AObject(event, true);
+		this.agentController.putO2AObject(event, false);
 
 		boolean result;
 		try {
@@ -375,5 +379,15 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	public void setMoveDirection(int moveDirection) {
 		this.moveDirection = moveDirection;
+	}
+	
+	private void goToClosestDeposit(int X, int Y) throws StaleProxyException {
+		containerInform(this.getType(), X, Y);
+		this.currentDestination = getClosestDeposit();
+		goingToDeposit = true;
+		this.component.setCurrentDestination(this);
+		System.out.println(getAgentName() + " is full, going to "
+				+ this.currentDestination.x + "|" + this.currentDestination.y
+				+ " to empty...");
 	}
 }
