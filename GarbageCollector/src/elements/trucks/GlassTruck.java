@@ -15,10 +15,10 @@ public class GlassTruck extends Truck implements DrawableElement {
 
 	public GlassTruck(Point initialLocation, int capacity,
 			ContainerController containerController, String agentName,
-			ArrayList<ArrayList<MapElement>> mapMatrix)
+			ArrayList<ArrayList<MapElement>> mapMatrix, boolean localInstance)
 			throws StaleProxyException {
 		super(initialLocation, capacity, containerController, agentName,
-				Assets.GLASS, mapMatrix);
+				Assets.GLASS, mapMatrix, localInstance);
 	}
 
 	@Override

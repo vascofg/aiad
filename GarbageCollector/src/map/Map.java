@@ -24,7 +24,7 @@ public class Map {
 	public ArrayList<Point> roadPoints;
 	public ArrayList<Point> depositPoints;
 	public MapGraph graph;
-	public AgentController worldAgent;
+	//public AgentController worldAgent;
 
 	public static final Map INSTANCE = new Map();
 

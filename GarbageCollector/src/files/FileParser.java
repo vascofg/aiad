@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import main.GarbageCollector;
 import map.Map;
 import algorithms.MapGraph;
 import elements.Deposit;
@@ -107,9 +108,11 @@ public class FileParser {
 			in.close();
 			System.out.println("Parsed " + count + " elements");
 			map.graph = new MapGraph(map);
-			map.worldAgent = containerController.createNewAgent("World",
-					"agents.WorldAgent", new Object[0]);
-			map.worldAgent.start();
+			if (GarbageCollector.local) {
+				containerController.createNewAgent("World",
+						"agents.WorldAgent", new Object[0]).start();
+			} //else
+				//map.worldAgent = 
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found!");
 		} catch (IOException e) {
@@ -160,25 +163,25 @@ public class FileParser {
 						case 'V':
 							currentTruck = new GlassTruck(initialLocation,
 									capacity, containerController, truckName,
-									mapMatrix);
+									mapMatrix, true);
 							trucks.add(currentTruck);
 							break;
 						case 'P':
 							currentTruck = new PaperTruck(initialLocation,
 									capacity, containerController, truckName,
-									mapMatrix);
+									mapMatrix, true);
 							trucks.add(currentTruck);
 							break;
 						case 'E':
 							currentTruck = new PlasticTruck(initialLocation,
 									capacity, containerController, truckName,
-									mapMatrix);
+									mapMatrix, true);
 							trucks.add(currentTruck);
 							break;
 						case 'I':
 							currentTruck = new GarbageTruck(initialLocation,
 									capacity, containerController, truckName,
-									mapMatrix);
+									mapMatrix, true);
 							trucks.add(currentTruck);
 							break;
 						}

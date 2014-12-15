@@ -7,13 +7,19 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.wrapper.StaleProxyException;
 
 import java.awt.Point;
 
+import assets.Assets;
 import main.GarbageCollector;
 import map.Map;
 import elements.Road;
 import elements.containers.Container;
+import elements.trucks.GarbageTruck;
+import elements.trucks.GlassTruck;
+import elements.trucks.PaperTruck;
+import elements.trucks.PlasticTruck;
 import elements.trucks.Truck;
 
 public class WorldAgent extends Agent {
@@ -47,14 +53,59 @@ public class WorldAgent extends Agent {
 			public void action() {
 				ACLMessage msg = receive();
 				if (msg != null) {
-					String[] args = msg.getContent().split("\\s+");
-					int requestType = Integer.parseInt(args[0]);
+					int requestType = -1;
+					String[] args = null;
+					try {
+						args = msg.getContent().split("\\s+");
+						requestType = Integer.parseInt(args[0]);
+					} catch (NumberFormatException e) {
+						return;
+					}
 					Map map = Map.INSTANCE;
 					Point point;
 					Container c;
 					ACLMessage sendMsg = null;
 					String toSend = null;
 					switch (requestType) {
+					case TruckAgent.CREATE_TRUCK:
+						// REQUEST_TYPE + TruckName + Capacity + X + Y +
+						// TruckType
+						try {
+							int type = Integer.parseInt(args[5]);
+							int capacity = Integer.parseInt(args[2]);
+							String name = args[1];
+							point = new Point(Integer.parseInt(args[3]),
+									Integer.parseInt(args[4]));
+							Truck truck = null;
+							switch (type) {
+							case Assets.GARBAGE:
+								truck = new GarbageTruck(point, capacity, null,
+										name, Map.INSTANCE.mapMatrix, false);
+								break;
+							case Assets.PLASTIC:
+								truck = new PlasticTruck(point, capacity, null,
+										name, Map.INSTANCE.mapMatrix, false);
+								break;
+							case Assets.PAPER:
+								truck = new PaperTruck(point, capacity, null,
+										name, Map.INSTANCE.mapMatrix, false);
+								break;
+							case Assets.GLASS:
+								truck = new GlassTruck(point, capacity, null,
+										name, Map.INSTANCE.mapMatrix, false);
+								break;
+							}
+							System.out.println("Added remote Truck " + name);
+							Map.INSTANCE.trucks.add(truck);
+							Map.getElement(Road.class, point,
+									Map.INSTANCE.mapMatrix).setTruck(truck);
+							GarbageCollector.frame.mapComponent.repaint();
+							return;
+						} catch (StaleProxyException e) {
+							e.printStackTrace();
+						}
+
+						break;
 					case TruckAgent.REQUEST_CONTAINER_CAPACITY:
 						point = new Point(Integer.parseInt(args[1]),
 								Integer.parseInt(args[2]));

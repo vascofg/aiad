@@ -47,6 +47,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	TruckDetailsComponent component;
 	private TruckInform waitInformThread;
 	boolean goingToDeposit = false;
+	public boolean remoteTruck;
 
 	private boolean go = true;
 	static final int tickTime = 150; // in ms
@@ -55,31 +56,40 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
-			int agentType, ArrayList<ArrayList<MapElement>> matrix)
-			throws StaleProxyException {
+			int agentType, ArrayList<ArrayList<MapElement>> matrix,
+			boolean localInstance) throws StaleProxyException {
 		super(name + " truck");
 		this.currentLocation = initialLocation;
 		this.capacity = capacity;
 		this.usedCapacity = 0;
 		this.mapMatrix = Map.cloneMapMatrix(matrix);
-		this.waitInformThread = new TruckInform(this);
-		this.waitInformThread.start();
-		this.agentController = containerController.createNewAgent(name,
-				TruckAgent.class.getName(), new Object[] { agentType,
-						this.waitInformThread });
-		this.agentController.start();
-		// wait until agent is started
-		while (agentController.getState().getCode() != AgentState.cAGENT_STATE_IDLE) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		this.agentName = name;
+		this.remoteTruck = !localInstance;
+		if (localInstance) {
+			this.waitInformThread = new TruckInform(this);
+			this.waitInformThread.start();
+			this.agentController = containerController.createNewAgent(name,
+					TruckAgent.class.getName(), new Object[] { agentType,
+							this.waitInformThread });
+			this.agentController.start();
+			// wait until agent is started
+			while (agentController.getState().getCode() != AgentState.cAGENT_STATE_IDLE) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (!GarbageCollector.local) {
+				createTruckRequest();
 			}
 		}
+		if (GarbageCollector.local) {
+			this.component = new TruckDetailsComponent(this);
+			GarbageCollector.frame.menu.addTruck(this);
+		}
 		this.alreadyInformedContainers = new LinkedList<Container>();
-		this.agentName = name;
-		this.component = new TruckDetailsComponent(this);
 	}
 
 	public TruckDetailsComponent getComponent() {
@@ -101,14 +111,16 @@ public abstract class Truck extends Thread implements DrawableElement {
 			throw new TruckFullException();
 		else {
 			this.usedCapacity += ammount;
-			this.component.setCurrentUsage(this);
+			if (GarbageCollector.local)
+				this.component.setCurrentUsage(this);
 		}
 
 	}
 
 	public void emptyTruck() {
 		this.usedCapacity = 0;
-		this.component.setCurrentUsage(this);
+		if (GarbageCollector.local)
+			this.component.setCurrentUsage(this);
 	}
 
 	public void moveTruck(Point destination) {
@@ -202,7 +214,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 				containerInform(this.getType(), X, Y);
 				this.currentDestination = getClosestDeposit();
 				goToClosestDeposit(X, Y);
-				this.component.setCurrentDestination(this);
+				if (GarbageCollector.local)
+					this.component.setCurrentDestination(this);
 				System.out.println(getAgentName() + " is full, going to "
 						+ this.currentDestination.x + "|"
 						+ this.currentDestination.y + " to empty...");
@@ -256,6 +269,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return result;
 	}
 
+	public void createTruckRequest() throws StaleProxyException {
+		Event event = new Event(TruckAgent.CREATE_TRUCK, this);
+		event.addParameter(new String(this.agentName + " " + this.getCapacity()
+				+ " " + this.currentLocation.x + " " + this.currentLocation.y
+				+ " " + this.getType()));
+		this.agentController.putO2AObject(event, true);
+	}
+
 	// temporary
 	public boolean moveRandomDirection(List<Point> possibleMoves) {
 		try {
@@ -274,7 +295,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 			pointIndex = 0; // TODO: ESTRATEGIAS
 		if (currentDestination == null) {
 			currentDestination = pointsToVisit.get(pointIndex);
-			this.component.setCurrentDestination(this);
+			if (GarbageCollector.local)
+				this.component.setCurrentDestination(this);
 		}
 		if (currentDestinationRoute.isEmpty()) {
 			ArrayList<Point> points = new ArrayList<Point>(2);
@@ -385,7 +407,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 		containerInform(this.getType(), X, Y);
 		this.currentDestination = getClosestDeposit();
 		goingToDeposit = true;
-		this.component.setCurrentDestination(this);
+		if (GarbageCollector.local)
+			this.component.setCurrentDestination(this);
 		System.out.println(getAgentName() + " is full, going to "
 				+ this.currentDestination.x + "|" + this.currentDestination.y
 				+ " to empty...");

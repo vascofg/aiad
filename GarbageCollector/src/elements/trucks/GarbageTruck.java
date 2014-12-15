@@ -15,10 +15,10 @@ public class GarbageTruck extends Truck implements DrawableElement {
 
 	public GarbageTruck(Point initialLocation, int capacity,
 			ContainerController containerController, String agentName,
-			ArrayList<ArrayList<MapElement>> mapMatrix)
+			ArrayList<ArrayList<MapElement>> mapMatrix, boolean localInstance)
 			throws StaleProxyException {
 		super(initialLocation, capacity, containerController, agentName,
-				Assets.GARBAGE, mapMatrix);
+				Assets.GARBAGE, mapMatrix, localInstance);
 	}
 
 	@Override

@@ -32,6 +32,7 @@ public class Menu extends JPanel {
 		c.anchor = GridBagConstraints.NORTH;
 		c.weighty = 1;
 		c.weightx = 1;
+		c.gridy = 0;
 
 		c.insets = new Insets(5, 10, 5, 10);
 		c.gridx = 0;
@@ -41,17 +42,13 @@ public class Menu extends JPanel {
 		c.gridx = 2;
 		container.add(new JLabel("Current Garbage Amount"), c);
 		this.add(container, BorderLayout.NORTH);
+
+		c.gridx = 0;
+		c.gridy = GridBagConstraints.RELATIVE;
+		c.gridwidth = 3;
 	}
 
-	public void addTrucks(ArrayList<Truck> trucks) {
-		c.gridx = 0;
-		c.gridy = 1;
-		c.gridwidth = 3;
-
-		for (int i = 0; i < trucks.size(); i++) {
-			c.gridy++;
-			container.add(trucks.get(i).getComponent(), c);
-		}
-		this.add(container, BorderLayout.NORTH);
+	public void addTruck(Truck truck) {
+		container.add(truck.getComponent(), c);
 	}
 }

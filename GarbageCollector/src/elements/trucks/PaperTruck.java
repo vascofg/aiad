@@ -15,10 +15,10 @@ public class PaperTruck extends Truck implements DrawableElement {
 
 	public PaperTruck(Point initialLocation, int capacity,
 			ContainerController containerController, String agentName,
-			ArrayList<ArrayList<MapElement>> mapMatrix)
+			ArrayList<ArrayList<MapElement>> mapMatrix, boolean localInstance)
 			throws StaleProxyException {
 		super(initialLocation, capacity, containerController, agentName,
-				Assets.PAPER, mapMatrix);
+				Assets.PAPER, mapMatrix, localInstance);
 	}
 
 	@Override
