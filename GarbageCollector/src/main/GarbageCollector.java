@@ -1,11 +1,14 @@
 package main;
 
+import elements.containers.Container;
+import elements.trucks.Truck;
 import files.FileParser;
 import gui.JGraphFrame;
 import gui.MapJFrame;
 import jade.core.ProfileImpl;
 import jade.wrapper.ContainerController;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import map.Map;
@@ -54,6 +57,28 @@ public class GarbageCollector {
 												// trucks
 			}
 		});
+
+        try {
+            Thread.sleep(180000);
+        } catch (InterruptedException e) {
+            System.out.println("sleep");
+            e.printStackTrace();
+        }
+
+        ArrayList<Truck> trucks = Map.INSTANCE.trucks;
+        for (int i = 0; i < trucks.size(); i++) {
+            System.out.println(trucks.get(i).getAgentName());
+            System.out.println("--Numbers of containers added: " + trucks.get(i).numberOfContainersAdded +  ",final: " + trucks.get(i).getPointsToVisit().size());
+            System.out.println("--Number of Containers Emptied: " + trucks.get(i).numberOfContainersEmptied);
+            System.out.println("--Number of Deposit Visits:" + trucks.get(i).numberOfDepositVisits);
+            System.out.println("--Total Amount of Garbage removed:" + trucks.get(i).totalAmountOfGarbage);
+            System.out.println("--------------------------------------");
+        }
+
+        ArrayList<Container> containers = Map.INSTANCE.containers;
+        for (int i = 0; i < containers.size(); i++) {
+            System.out.println( containers.get(i).getType() + " type Container:" + containers.get(i).getMaxUsedCapacity());
+        }
 	}
 
 }
