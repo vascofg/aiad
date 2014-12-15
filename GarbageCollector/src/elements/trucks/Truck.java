@@ -48,11 +48,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 	private TruckInform waitInformThread;
 	boolean goingToDeposit = false;
 	public boolean remoteTruck;
+    //Statistics
+    public int numberOfContainersAdded = 0, numberOfContainersEmptied = 0, totalAmountOfGarbage = 0, numberOfDepositVisits = 0;
 
+    private static double emptyFactor = 0.75;
 	private boolean go = true;
 	static final int tickTime = 150; // in ms
 	static final int waitTime = 500;
-	private static final int vision = 4;
+	private static final int vision = 1;
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -92,7 +95,11 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.alreadyInformedContainers = new LinkedList<Container>();
 	}
 
-	public TruckDetailsComponent getComponent() {
+    public ArrayList<Point> getPointsToVisit() {
+        return pointsToVisit;
+    }
+
+    public TruckDetailsComponent getComponent() {
 		return component;
 	}
 
@@ -141,21 +148,26 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public boolean emptyAdjacentContainers(List<Container> adjacentContainers,
 			List<Point> adjacentContainerPoints) {
 		boolean emptiedAny = false;
+        int garbageAmountBeforeEmptying = this.usedCapacity;
 		try {
 			for (int i = 0; i < adjacentContainers.size(); i++) {
 				Container c = adjacentContainers.get(i);
 				Point p = adjacentContainerPoints.get(i);
 				if (c.truckCompatible(this)
 						&& this.usedCapacity < this.capacity) {
-					if (containerRequest(p.x, p.y))
-						emptiedAny = true;
-				}
+                    if (containerRequest(p.x, p.y)) {
+                        emptiedAny = true;
+                        numberOfContainersEmptied++;
+                        totalAmountOfGarbage += this.usedCapacity - garbageAmountBeforeEmptying;
+                    }
+                }
 
 			}
 		} catch (StaleProxyException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		return emptiedAny;
 	}
 
@@ -174,6 +186,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public boolean emptyInDeposit(List<Point> adjacentDeposits) {
 		if (adjacentDeposits.size() > 0) {
 			this.emptyTruck();
+            this.numberOfDepositVisits++;
 			this.goingToDeposit = false;
 			return true;
 		}
@@ -205,7 +218,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 			try {
 				this.addToTruck(usedContainerCapacity);
 				emptiedContainerInform(X, Y);
-				if (this.usedCapacity == this.capacity)
+				if (this.usedCapacity >= this.capacity*emptyFactor)
 					goToClosestDeposit(X, Y);
 				return true;
 				// TODO: esvaziar o que puder (tem de avisar mundo)

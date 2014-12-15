@@ -8,7 +8,7 @@ public abstract class Container extends MapElement {
 
 	public static int defaultCapacity = 20;
 
-	Integer capacity, usedCapacity;
+	Integer capacity, usedCapacity, maxUsedCapacity = 0;
 
 	public Container(Integer capacity) {
 		this.capacity = capacity;
@@ -33,11 +33,19 @@ public abstract class Container extends MapElement {
 	public void addToContainer(int ammount) throws ContainerFullException {
 		if ((this.usedCapacity + ammount) > this.capacity)
 			throw new ContainerFullException();
-		else
-			this.usedCapacity += ammount;
+		else {
+            this.usedCapacity += ammount;
+            if (this.usedCapacity > this.maxUsedCapacity)
+                this.maxUsedCapacity = this.usedCapacity;
+
+        }
 	}
 
-	public boolean isEmpty() {
+    public Integer getMaxUsedCapacity() {
+        return maxUsedCapacity;
+    }
+
+    public boolean isEmpty() {
 		return usedCapacity == 0;
 	}
 

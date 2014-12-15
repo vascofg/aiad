@@ -88,13 +88,15 @@ public class TruckInform extends Thread {
 
 						if (mineIsCloser) {
 							// TODO: interface para opções
-							if (GarbageCollector.addToRoute)
-								truck.pointsToVisit.add(toVisit); // permanente
+							if (GarbageCollector.addToRoute) {
+                                truck.pointsToVisit.add(toVisit); // permanente
+                                truck.numberOfContainersAdded++;
+                            }
 							else if (!truck.goingToDeposit)
 								truck.currentDestination = toVisit;
-							System.out.println(truck.agentName
+							/*System.out.println(truck.agentName
 									+ " added point to visit: " + toVisit.x
-									+ "|" + toVisit.y);
+									+ "|" + toVisit.y);*/
 						}
 					} else { // already on my route
 						sendInformDist.addParameter(truck.getType() + " "
