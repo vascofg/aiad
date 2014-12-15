@@ -58,7 +58,8 @@ public class GarbageCollector {
 			}
 		});
 
-        try {
+        //testes
+        /*try {
             Thread.sleep(180000);
         } catch (InterruptedException e) {
             System.out.println("sleep");
@@ -78,7 +79,7 @@ public class GarbageCollector {
         ArrayList<Container> containers = Map.INSTANCE.containers;
         for (int i = 0; i < containers.size(); i++) {
             System.out.println( containers.get(i).getType() + " type Container:" + containers.get(i).getMaxUsedCapacity());
-        }
+        }*/
 	}
 
 }
