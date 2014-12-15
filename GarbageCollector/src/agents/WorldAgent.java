@@ -21,6 +21,7 @@ import elements.trucks.GlassTruck;
 import elements.trucks.PaperTruck;
 import elements.trucks.PlasticTruck;
 import elements.trucks.Truck;
+import exceptions.TruckFullException;
 
 public class WorldAgent extends Agent {
 	private static final long serialVersionUID = 1L;
@@ -66,8 +67,9 @@ public class WorldAgent extends Agent {
 					Container c;
 					ACLMessage sendMsg = null;
 					String toSend = null;
+					Truck truck;
 					switch (requestType) {
-					case TruckAgent.CREATE_TRUCK:
+					case TruckAgent.INFORM_CREATE_TRUCK:
 						// REQUEST_TYPE + TruckName + Capacity + X + Y +
 						// TruckType
 						try {
@@ -76,7 +78,7 @@ public class WorldAgent extends Agent {
 							String name = args[1];
 							point = new Point(Integer.parseInt(args[3]),
 									Integer.parseInt(args[4]));
-							Truck truck = null;
+							truck = null;
 							switch (type) {
 							case Assets.GARBAGE:
 								truck = new GarbageTruck(point, capacity, null,
@@ -128,8 +130,7 @@ public class WorldAgent extends Agent {
 										+ c.getUsedCapacity());
 						break;
 					case TruckAgent.REQUEST_MOVE:
-						Truck truck = Map.getTruckByAgentName(args[1],
-								map.trucks);
+						truck = Map.getTruckByAgentName(args[1], map.trucks);
 						point = new Point(Integer.parseInt(args[2]),
 								Integer.parseInt(args[3]));
 						int moveDir = Integer.parseInt(args[4]);
@@ -172,9 +173,45 @@ public class WorldAgent extends Agent {
 						toSend = Integer
 								.toString(WorldAgent.CONFIRM_REFUSE_MOVE);
 						break;
+					case TruckAgent.INFORM_EMPTIED_TRUCK:
+						truck = Map.getTruckByAgentName(args[1],
+								Map.INSTANCE.trucks);
+						if (truck.remoteTruck) {
+							truck.emptyTruck();
+							truck.goingToDeposit = false;
+						}
+						break;
+					case TruckAgent.INFORM_GOING_TO_DEPOSIT:
+						truck = Map.getTruckByAgentName(args[1],
+								Map.INSTANCE.trucks);
+						if (truck.remoteTruck)
+							truck.goingToDeposit = true;
+						break;
+					case TruckAgent.INFORM_CURRENT_DESTINATION:
+						truck = Map.getTruckByAgentName(args[1],
+								Map.INSTANCE.trucks);
+						point = new Point(Integer.parseInt(args[2]),
+								Integer.parseInt(args[3]));
+						if (truck.remoteTruck) {
+							truck.currentDestination = point;
+							truck.getComponent().setCurrentDestination(truck);
+						}
+						break;
 					case TruckAgent.INFORM_EMPTIED_CONTAINER:
-						point = new Point(Integer.parseInt(args[1]),
-								Integer.parseInt(args[2]));
+						String name = args[1];
+						point = new Point(Integer.parseInt(args[2]),
+								Integer.parseInt(args[3]));
+						truck = Map.getTruckByAgentName(name,
+								Map.INSTANCE.trucks);
+						if (truck.remoteTruck)
+							try {
+								int ammount = Integer.parseInt(args[4]);
+								truck.addToTruck(ammount);
+							} catch (TruckFullException e) {
+								System.out
+										.println("Sinchronization error in truck capacity!");
+								e.printStackTrace();
+							}
 						c = Map.getElement(Container.class, point,
 								map.mapMatrix);
 						c.emptyContainer();
@@ -187,9 +224,11 @@ public class WorldAgent extends Agent {
 										+ requestType + ")!");
 						return;
 					}
-					sendMsg.addReceiver(msg.getSender());
-					sendMsg.setContent(toSend);
-					send(sendMsg);
+					if (sendMsg != null) {
+						sendMsg.addReceiver(msg.getSender());
+						sendMsg.setContent(toSend);
+						send(sendMsg);
+					}
 				} else {
 					block();
 				}

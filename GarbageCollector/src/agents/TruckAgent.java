@@ -25,7 +25,9 @@ public class TruckAgent extends Agent {
 	private AID worldAgent;
 	public static final int REQUEST_CONTAINER_CAPACITY = 1, REQUEST_MOVE = 2,
 			INFORM_OTHER_TRUCKS = 3, INFORM_EMPTIED_CONTAINER = 4,
-			GOT_INFORM_EVENT = 7, INFORM_DISTANCE = 8, CREATE_TRUCK = 9;
+			GOT_INFORM_EVENT = 7, INFORM_DISTANCE = 8, INFORM_CREATE_TRUCK = 9,
+			INFORM_EMPTIED_TRUCK = 10, INFORM_GOING_TO_DEPOSIT = 11,
+			INFORM_CURRENT_DESTINATION = 12;
 	private TruckInform truckInformThread;
 
 	// método setup
@@ -151,7 +153,7 @@ public class TruckAgent extends Agent {
 								toSend = event.getType() + " " + args[1] + " "
 										+ args[2] + " " + args[3];
 							break;
-						case TruckAgent.CREATE_TRUCK:
+						case TruckAgent.INFORM_CREATE_TRUCK:
 							msg = new ACLMessage(ACLMessage.INFORM);
 							msg.addReceiver(worldAgent);
 							// REQUEST_TYPE + TruckName + Capacity + X + Y +
@@ -159,6 +161,20 @@ public class TruckAgent extends Agent {
 							toSend = event.getType() + " " + args[0] + " "
 									+ args[1] + " " + args[2] + " " + args[3]
 									+ " " + args[4];
+							break;
+						case TruckAgent.INFORM_EMPTIED_TRUCK:
+						case TruckAgent.INFORM_GOING_TO_DEPOSIT:
+							msg = new ACLMessage(ACLMessage.INFORM);
+							msg.addReceiver(worldAgent);
+							// REQUEST_TYPE + TruckName
+							toSend = event.getType() + " " + args[0];
+							break;
+						case TruckAgent.INFORM_CURRENT_DESTINATION:
+							msg = new ACLMessage(ACLMessage.INFORM);
+							msg.addReceiver(worldAgent);
+							// REQUEST_TYPE + TruckName + X + Y
+							toSend = event.getType() + " " + args[0] + " "
+									+ args[1] + " " + args[2];
 							break;
 						case TruckAgent.REQUEST_CONTAINER_CAPACITY:
 							myTruckAgent.event = event;
@@ -188,9 +204,9 @@ public class TruckAgent extends Agent {
 						case TruckAgent.INFORM_EMPTIED_CONTAINER:
 							msg = new ACLMessage(ACLMessage.INFORM);
 							msg.addReceiver(worldAgent);
-							// REQUEST_TYPE + X + Y
+							// REQUEST_TYPE + X + Y + Used_Capacity
 							toSend = event.getType() + " " + args[0] + " "
-									+ args[1];
+									+ args[1] + " " + args[2] + " " + args[3];
 							break;
 						default:
 							System.out

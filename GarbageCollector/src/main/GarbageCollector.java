@@ -49,19 +49,8 @@ public class GarbageCollector {
 				JOptionPane.YES_NO_OPTION);
 		if (reply == JOptionPane.YES_OPTION) {
 			GarbageCollector.local = false;
-			//GarbageCollector.remotePlatformName = JOptionPane.showInputDialog("Platform Name:");
-			//GarbageCollector.remoteMTP = JOptionPane.showInputDialog("MTP:");
-			int reply2 = JOptionPane.showConfirmDialog(null,
-					"PORTATIL?", "Remote?",
-					JOptionPane.YES_NO_OPTION);
-			if (reply2 == JOptionPane.YES_OPTION) {
-				GarbageCollector.remotePlatformName = "192.168.56.1:1099/JADE";
-				GarbageCollector.remoteMTP = "http://192.168.108.47:7778/acc";
-			}
-			else {
-				GarbageCollector.remotePlatformName = "192.168.108.201:1099/JADE";
-				GarbageCollector.remoteMTP = "http://192.168.108.201:7778/acc";
-			}
+			GarbageCollector.remotePlatformName = JOptionPane.showInputDialog("Platform Name:");
+			GarbageCollector.remoteMTP = JOptionPane.showInputDialog("MTP:");
 		}
 
 		System.out.println("Starting JADE...");

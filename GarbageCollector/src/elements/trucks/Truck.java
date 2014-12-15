@@ -34,7 +34,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 
 	Point currentLocation;
 
-	Point currentDestination;
+	public Point currentDestination;
 	ArrayList<Point> pointsToVisit;
 	private int pointIndex, moveDirection;
 	private ArrayList<DefaultEdge> currentDestinationRoute;
@@ -46,16 +46,17 @@ public abstract class Truck extends Thread implements DrawableElement {
 	private int capacity, usedCapacity;
 	TruckDetailsComponent component;
 	private TruckInform waitInformThread;
-	boolean goingToDeposit = false;
+	public boolean goingToDeposit = false;
 	public boolean remoteTruck;
-    //Statistics
-    public int numberOfContainersAdded = 0, numberOfContainersEmptied = 0, totalAmountOfGarbage = 0, numberOfDepositVisits = 0;
+	// Statistics
+	public int numberOfContainersAdded = 0, numberOfContainersEmptied = 0,
+			totalAmountOfGarbage = 0, numberOfDepositVisits = 0;
 
-    private static double emptyFactor = 0.75;
+	private static double emptyFactor = 0.75;
 	private boolean go = true;
 	static final int tickTime = 150; // in ms
 	static final int waitTime = 500;
-	private static final int vision = 1;
+	private static final int vision = 5;
 
 	public Truck(Point initialLocation, int capacity,
 			ContainerController containerController, String name,
@@ -85,7 +86,7 @@ public abstract class Truck extends Thread implements DrawableElement {
 				}
 			}
 			if (!GarbageCollector.local) {
-				createTruckRequest();
+				createTruckInform();
 			}
 		}
 		if (GarbageCollector.local) {
@@ -95,11 +96,11 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.alreadyInformedContainers = new LinkedList<Container>();
 	}
 
-    public ArrayList<Point> getPointsToVisit() {
-        return pointsToVisit;
-    }
+	public ArrayList<Point> getPointsToVisit() {
+		return pointsToVisit;
+	}
 
-    public TruckDetailsComponent getComponent() {
+	public TruckDetailsComponent getComponent() {
 		return component;
 	}
 
@@ -148,19 +149,20 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public boolean emptyAdjacentContainers(List<Container> adjacentContainers,
 			List<Point> adjacentContainerPoints) {
 		boolean emptiedAny = false;
-        int garbageAmountBeforeEmptying = this.usedCapacity;
+		int garbageAmountBeforeEmptying = this.usedCapacity;
 		try {
 			for (int i = 0; i < adjacentContainers.size(); i++) {
 				Container c = adjacentContainers.get(i);
 				Point p = adjacentContainerPoints.get(i);
 				if (c.truckCompatible(this)
 						&& this.usedCapacity < this.capacity) {
-                    if (containerRequest(p.x, p.y)) {
-                        emptiedAny = true;
-                        numberOfContainersEmptied++;
-                        totalAmountOfGarbage += this.usedCapacity - garbageAmountBeforeEmptying;
-                    }
-                }
+					if (containerRequest(p.x, p.y)) {
+						emptiedAny = true;
+						numberOfContainersEmptied++;
+						totalAmountOfGarbage += this.usedCapacity
+								- garbageAmountBeforeEmptying;
+					}
+				}
 
 			}
 		} catch (StaleProxyException | InterruptedException e) {
@@ -186,8 +188,14 @@ public abstract class Truck extends Thread implements DrawableElement {
 	public boolean emptyInDeposit(List<Point> adjacentDeposits) {
 		if (adjacentDeposits.size() > 0) {
 			this.emptyTruck();
-            this.numberOfDepositVisits++;
+			this.numberOfDepositVisits++;
 			this.goingToDeposit = false;
+			try {
+				if (!GarbageCollector.local)
+					emptiedTruckInform();
+			} catch (StaleProxyException e) {
+				e.printStackTrace();
+			}
 			return true;
 		}
 		return false;
@@ -200,9 +208,24 @@ public abstract class Truck extends Thread implements DrawableElement {
 		this.agentController.putO2AObject(event, false);
 	}
 
-	public void emptiedContainerInform(int X, int Y) throws StaleProxyException {
+	public void emptiedContainerInform(int X, int Y, int ammount)
+			throws StaleProxyException {
 		Event event = new Event(TruckAgent.INFORM_EMPTIED_CONTAINER, this);
-		event.addParameter(new String(X + " " + Y));
+		event.addParameter(new String(getAgentName() + " " + X + " " + Y + " "
+				+ ammount));
+		this.agentController.putO2AObject(event, false);
+	}
+
+	public void goingToDepositInform() throws StaleProxyException {
+		Event event = new Event(TruckAgent.INFORM_GOING_TO_DEPOSIT, this);
+		event.addParameter(new String(getAgentName()));
+		this.agentController.putO2AObject(event, false);
+	}
+
+	public void currentDestinationInform() throws StaleProxyException {
+		Event event = new Event(TruckAgent.INFORM_CURRENT_DESTINATION, this);
+		event.addParameter(new String(getAgentName() + " "
+				+ this.currentDestination.x + " " + this.currentDestination.y));
 		this.agentController.putO2AObject(event, false);
 	}
 
@@ -217,8 +240,8 @@ public abstract class Truck extends Thread implements DrawableElement {
 		if (usedContainerCapacity > 0) {
 			try {
 				this.addToTruck(usedContainerCapacity);
-				emptiedContainerInform(X, Y);
-				if (this.usedCapacity >= this.capacity*emptyFactor)
+				emptiedContainerInform(X, Y, usedContainerCapacity);
+				if (this.usedCapacity >= this.capacity * emptyFactor)
 					goToClosestDeposit(X, Y);
 				return true;
 				// TODO: esvaziar o que puder (tem de avisar mundo)
@@ -282,12 +305,18 @@ public abstract class Truck extends Thread implements DrawableElement {
 		return result;
 	}
 
-	public void createTruckRequest() throws StaleProxyException {
-		Event event = new Event(TruckAgent.CREATE_TRUCK, this);
+	public void createTruckInform() throws StaleProxyException {
+		Event event = new Event(TruckAgent.INFORM_CREATE_TRUCK, this);
 		event.addParameter(new String(this.agentName + " " + this.getCapacity()
 				+ " " + this.currentLocation.x + " " + this.currentLocation.y
 				+ " " + this.getType()));
 		this.agentController.putO2AObject(event, true);
+	}
+
+	public void emptiedTruckInform() throws StaleProxyException {
+		Event event = new Event(TruckAgent.INFORM_EMPTIED_TRUCK, this);
+		event.addParameter(new String(this.agentName));
+		this.agentController.putO2AObject(event, false);
 	}
 
 	// temporary
@@ -308,8 +337,11 @@ public abstract class Truck extends Thread implements DrawableElement {
 			pointIndex = 0; // TODO: ESTRATEGIAS
 		if (currentDestination == null) {
 			currentDestination = pointsToVisit.get(pointIndex);
+				
 			if (GarbageCollector.local)
 				this.component.setCurrentDestination(this);
+			else
+				currentDestinationInform();
 		}
 		if (currentDestinationRoute.isEmpty()) {
 			ArrayList<Point> points = new ArrayList<Point>(2);
@@ -422,6 +454,9 @@ public abstract class Truck extends Thread implements DrawableElement {
 		goingToDeposit = true;
 		if (GarbageCollector.local)
 			this.component.setCurrentDestination(this);
+		else
+			currentDestinationInform();
+			goingToDepositInform();
 		System.out.println(getAgentName() + " is full, going to "
 				+ this.currentDestination.x + "|" + this.currentDestination.y
 				+ " to empty...");
