@@ -96,12 +96,21 @@ public class WorldAgent extends Agent {
 								break;
 							}
 							System.out.println("Added remote Truck " + name);
+							DFAgentDescription dfd = new DFAgentDescription();
+							dfd.setName(msg.getSender());
+							ServiceDescription sd = new ServiceDescription();
+							sd.setType(Integer.toString(type));
+							sd.setName(getName());
+							dfd.addServices(sd);
+							DFService.register(myAgent, dfd);
 							Map.INSTANCE.trucks.add(truck);
 							Map.getElement(Road.class, point,
 									Map.INSTANCE.mapMatrix).setTruck(truck);
 							GarbageCollector.frame.mapComponent.repaint();
 							return;
 						} catch (StaleProxyException e) {
+							e.printStackTrace();
+						} catch (FIPAException e) {
 							e.printStackTrace();
 						}
 
