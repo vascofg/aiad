@@ -91,12 +91,16 @@ public class TruckInform extends Thread {
 							if (GarbageCollector.addToRoute) {
                                 truck.pointsToVisit.add(toVisit); // permanente
                                 truck.numberOfContainersAdded++;
+                                System.out.println(truck.agentName
+    									+ " added point to visit: " + toVisit.x
+    									+ "|" + toVisit.y);
                             }
-							else if (!truck.goingToDeposit)
+							else if (!truck.goingToDeposit) {
 								truck.currentDestination = toVisit;
-							/*System.out.println(truck.agentName
-									+ " added point to visit: " + toVisit.x
-									+ "|" + toVisit.y);*/
+								System.out.println(truck.agentName
+										+ " going to: " + toVisit.x
+    									+ "|" + toVisit.y);
+							}
 						}
 					} else { // already on my route
 						sendInformDist.addParameter(truck.getType() + " "
